@@ -1,17 +1,41 @@
-# BROTHER'S Header Integration
+# BROTHER'S Header Integration Decision
 
-This site uses a Wix HTML component for the custom promotional/search header and Velo code in `src/pages/masterPage.js` for navigation.
+## Decision
 
-## Supported HTML component IDs
+Use native Wix controls for the logo, primary menu, product search, account, cart, phone, and location. Keep the HTML Embed only for the promotion strip.
 
-The Velo bridge automatically checks these IDs in order:
+This is more reliable because native controls are part of the Wix page, work with Wix routing and accessibility features, and do not depend on cross-frame messages or popup permissions.
 
-1. `#htmlHeader` (preferred)
-2. `#html2` (legacy/current fallback)
+## Root cause
 
-This means the existing Wix element can continue using `html2`. Renaming it to `htmlHeader` is optional.
+The live header Embed runs inside a Wix iframe. Its current script:
 
-## Message format sent from the HTML component
+1. Prevents the default link action.
+2. Sends a `postMessage()` action to the parent Wix page.
+3. Waits 1.2 seconds.
+4. Tries `window.open()` as a fallback.
+
+That design has several failure points: the Embed may be page-specific instead of global, its Wix element ID may differ, the Velo bridge may not be synchronized or published, and delayed popups may be blocked. A `working` acknowledgement only proves the message was received; it does not prove navigation completed.
+
+Published-site testing on 2026-07-13 confirmed that All Products, Search, and Location now work after the two previous header pull requests were merged. The bridge should therefore be preserved during migration, not patched again at random.
+
+## Recommended final structure
+
+| Header part | Final implementation | Reason |
+| --- | --- | --- |
+| Promotion and coupon | HTML Embed using `docs/wix-embed/brothers-header.html` | Small, self-contained visual behavior |
+| Logo and Home | Native Wix image/button | Reliable same-site navigation |
+| Main menu | Native Wix menu | Keyboard, mobile, and route support |
+| Product search | Native Wix Site Search | Product indexing and result feedback |
+| All Products | Native Wix button | Direct `/category/all-products` link |
+| Account | Wix Members login bar | Native sign-up, login, and account state |
+| Cart | Wix Stores cart icon | Native cart state and checkout |
+| Phone | Native Wix text/button | Direct `tel:+60378038911` link |
+| Location | Native Wix button | Direct confirmed Google Maps destination |
+
+## Transitional bridge
+
+Until the native controls are published, the current Embed must send an object with the exact source identifier:
 
 ```js
 window.parent.postMessage({
@@ -20,45 +44,29 @@ window.parent.postMessage({
 }, '*');
 ```
 
-Supported actions:
+Supported actions are `home`, `products`, `search`, and `location`. Search may include a `query` string. `src/pages/masterPage.js` rejects missing sources, unknown actions, arbitrary URLs, and search input beyond 120 characters.
 
-- `home`
-- `products`
-- `search` with a `query` string
-- `location`
+## Do not use
 
-Example search message:
+- `window.top.location`
+- Delayed `window.open()` fallbacks
+- Multiple click handlers for the same control
+- Arbitrary URLs received from `postMessage`
+- Acknowledgement messages as proof that navigation succeeded
+- Critical navigation inside a page-only Embed
 
-```js
-window.parent.postMessage({
-  source: 'brothersHeader',
-  action: 'search',
-  query: searchInput.value.trim()
-}, '*');
-```
+## Verification
 
-## Routes
+After rebuilding the header with native controls, publish and test:
 
-- Home: `/`
-- All Products: `/category/all-products`
-- Search Results: `/search?q=...`
-- Location: direct Google Maps search URL for the Kelana Jaya branch
+1. Logo opens Home in the same tab.
+2. Shop opens `/category/all-products`.
+3. Search for `Tesla Model 3` returns product results.
+4. Empty search shows clear feedback or opens the shop.
+5. Location opens the confirmed Kelana Jaya address.
+6. Account opens Wix Members login/sign-up.
+7. Cart opens the Wix Stores cart.
+8. Keyboard focus is visible and follows a logical order.
+9. Mobile controls are at least about 44 × 44 CSS pixels.
 
-## Testing
-
-Wix navigation does not work reliably inside the editor preview. Publish the site and test on the live URL.
-
-Check these actions:
-
-1. Logo opens Home.
-2. All Products opens the product category.
-3. A non-empty search opens Search Results with the query.
-4. An empty search opens All Products.
-5. Location opens Google Maps.
-
-## Wix setup still required
-
-- Keep the HTML element ID as `html2`, or rename it to `htmlHeader`.
-- The HTML code must send the messages shown above.
-- Wix Site Search must be installed and the `/search` results page must be enabled for product results.
-- Publish before testing navigation.
+Exact editor actions are in `docs/wix-manual-steps.md`.
