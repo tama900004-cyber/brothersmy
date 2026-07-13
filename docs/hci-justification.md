@@ -11,7 +11,7 @@
 ## Shop and product pages
 
 - User goal: find a relevant automotive product, compare it, and add it to the cart.
-- Current problem: only 34 generic rental-car products, placeholder category text, unclear `CARS` label, and unverified prices.
+- Current problem: the catalog now reaches 100 illustrated products, but placeholder category text, the unclear `CARS` label, and unverified commercial prices/fitment still reduce trust.
 - Principles: recognition over recall, consistency, feedback, error prevention.
 - Decision: use visible accessory categories, consistent product cards, verified price/compatibility fields, breadcrumbs, filters, and explicit empty/no-results messages.
 - Benefit: users can narrow choices without remembering product names and understand why a search returned nothing.

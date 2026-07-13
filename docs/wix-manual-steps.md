@@ -110,17 +110,17 @@ Complete these steps in order. Publish only after preview checks pass.
 4. If it is required, reconnect/reinstall it and verify the public console no longer reports the error.
 5. Do not remove Wix Stores, Wix Bookings, Wix Members, Wix Search, Wix Forms or Wix Chat without confirming their assignment role.
 
-## 9. Verify products and reach 100 valid items
+## 9. Review the implemented 100-product catalog
 
 1. Open Wix Dashboard → Store Products.
-2. Confirm the current count is 34.
-3. Click More Actions → Import and use Export Products to download Wix's current CSV structure.
-4. Complete `docs/product-content-staging.csv` with owner-approved products.
-5. Transfer approved rows into the exported Wix CSV without changing its headers or column order.
-6. Include only valid product names, descriptions, categories, images, prices and stock information.
-7. Import in small reviewed batches and fix every row error before continuing.
-8. Verify the final dashboard and live-site count reaches at least 100.
-9. Capture a Wix dashboard screenshot showing the count and a live gallery screenshot.
+2. Confirm the current catalog is 100 visible products and that every product has an image.
+3. Review the 66 new `BA-001`–`BA-066` items against `docs/product-content-staging.csv`.
+4. Confirm or correct each display price, brand, stock state, vehicle fitment and installation requirement with the business.
+5. Keep the confirmation warning until the item's final commercial values are approved.
+6. Review the seven new collections and confirm their product counts are 12, 8, 10, 10, 12, 8 and 6.
+7. Replace any project illustration with an approved real product photo later without changing the product SKU.
+8. Recheck product pages, images, categories, filters, mobile layout and search indexing after every correction.
+9. Capture a Wix dashboard screenshot showing 100 products and a live gallery screenshot showing the 100-product count.
 
 ## 10. Configure payment presentation honestly
 
