@@ -1,13 +1,5 @@
 import wixLocationFrontend from 'wix-location-frontend';
-
-const HEADER_COMPONENT_IDS = ['#htmlHeader', '#html2'];
-
-const ROUTES = Object.freeze({
-    home: '/',
-    products: '/category/all-products',
-    search: '/search',
-    location: 'https://www.google.com/maps/search/?api=1&query=No.10%20Jalan%20SS6%2F12%2C%20Kelana%20Jaya%2C%2047301%20Petaling%20Jaya%2C%20Selangor%2C%20Malaysia'
-});
+import { HEADER_BRIDGE, ROUTES } from 'public/siteConfig';
 
 const ACTION_ALIASES = Object.freeze({
     home: 'home',
@@ -26,9 +18,6 @@ $w.onReady(function () {
     const htmlHeader = findHeaderComponent();
 
     if (!htmlHeader) {
-        console.warn(
-            '[BROTHERS header] No HTML component found. Expected #htmlHeader or #html2.'
-        );
         return;
     }
 
@@ -62,7 +51,7 @@ $w.onReady(function () {
 });
 
 function findHeaderComponent() {
-    for (const selector of HEADER_COMPONENT_IDS) {
+    for (const selector of HEADER_BRIDGE.componentIds) {
         try {
             const component = $w(selector);
 
@@ -73,7 +62,7 @@ function findHeaderComponent() {
             ) {
                 return component;
             }
-        } catch (error) {
+        } catch {
             // The selector does not exist on this site version. Try the next one.
         }
     }
@@ -96,23 +85,16 @@ function isWixInternalMessage(data) {
 }
 
 function normalizeMessage(data) {
-    let rawAction;
-    let query = '';
-    let source = '';
-
-    if (typeof data === 'string') {
-        rawAction = data;
-    } else if (data && typeof data === 'object') {
-        rawAction = data.action || data.command || data.type;
-        query = typeof data.query === 'string' ? data.query : '';
-        source = typeof data.source === 'string' ? data.source : '';
-    } else {
+    if (!data || typeof data !== 'object') {
         return null;
     }
 
-    if (source && source !== 'brothersHeader') {
+    if (data.source !== HEADER_BRIDGE.inboundSource) {
         return null;
     }
+
+    const rawAction = data.action || data.command || data.type;
+    const query = typeof data.query === 'string' ? data.query : '';
 
     const actionKey = String(rawAction || '')
         .toLowerCase()
@@ -127,7 +109,7 @@ function normalizeMessage(data) {
 
     return {
         action,
-        query: query.trim().slice(0, 120)
+        query: query.trim().slice(0, HEADER_BRIDGE.maxSearchLength)
     };
 }
 
@@ -145,19 +127,19 @@ function handleHeaderAction(message, htmlHeader) {
             break;
 
         case 'products':
-            navigateTo(ROUTES.products);
+            navigateTo(ROUTES.shop);
             break;
 
         case 'search':
             navigateTo(
                 query
                     ? `${ROUTES.search}?q=${encodeURIComponent(query)}`
-                    : ROUTES.products
+                    : ROUTES.shop
             );
             break;
 
         case 'location':
-            navigateTo(ROUTES.location);
+            navigateTo(ROUTES.maps);
             break;
 
         default:
@@ -172,7 +154,7 @@ function navigateTo(url) {
 function sendStatus(htmlHeader, payload) {
     try {
         htmlHeader.postMessage({
-            source: 'brothersWix',
+            source: HEADER_BRIDGE.outboundSource,
             ...payload
         });
     } catch (error) {
