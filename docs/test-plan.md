@@ -28,8 +28,9 @@ Update the Actual result column after every implementation.
 | Products | Catalog count and media | At least 100 visible products with images | Wix API returned 100 visible products and 100 with images; public gallery reports 100 | Pass |
 | Products | New automotive collections | Seven populated category links | All seven links appeared on the published All Products page with verified counts totaling 66 | Pass |
 | Products | Representative new item | Correct title, price, image and warning | Digital Tyre Pressure Gauge loaded publicly with RM49, image and confirmation warning | Pass |
-| Booking | Services route | Page loads | `/book-online` loaded three services | Pass, data unverified |
-| Cart | Empty cart route | Page loads | `/cart-page` showed My cart and Order summary | Pass |
+| Booking | Services route | Safe request flow | Three visible services require manual approval and show `Request to Book`; Car Rental still has no future class sessions | Partial |
+| Cart | Add and remove an item | Item appears, then cart is empty after cleanup | Universal Car Phone Holder showed RM39 subtotal; removal returned `Cart is empty` | Pass |
+| Checkout | Reach checkout without submitting | Configuration is visible; no order or payment is submitted | Displayed `We can’t accept online payments` and no coupon field | Blocked |
 | Members | Signed-out account entry | Login/sign-up available | `/my-subscriptions` showed Sign Up and Log In | Pass |
 | Layout | Desktop horizontal overflow | No overflow | 1602 px document in 1348 px viewport | Fail |
 | Branding | Global content | BROTHER'S only | Black Royal/RedRoyal found | Fail |
@@ -97,7 +98,7 @@ Update the Actual result column after every implementation.
 - WELCOME25 is visible.
 - Copy button copies exactly `WELCOME25`.
 - Screen reader status announces copy success.
-- Expired offer disables the button and shows Offer ended.
+- `TERMS APPLY` is visible and no unverified expiry/countdown is shown.
 - Reduced-motion preference does not cause animation.
 
 ### Responsive and accessibility

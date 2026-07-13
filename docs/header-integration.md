@@ -23,7 +23,7 @@ Published-site testing on 2026-07-13 confirmed that All Products, Search, and Lo
 
 | Header part | Final implementation | Reason |
 | --- | --- | --- |
-| Promotion and coupon | HTML Embed using `docs/wix-embed/brothers-header.html` | Small, self-contained visual behavior |
+| Promotion and coupon | HTML Embed using `docs/wix-embed/brothers-header.html` | Small, self-contained visual behavior without an unverified expiry claim |
 | Logo and Home | Native Wix image/button | Reliable same-site navigation |
 | Main menu | Native Wix menu | Keyboard, mobile, and route support |
 | Product search | Native Wix Site Search | Product indexing and result feedback |
@@ -68,5 +68,7 @@ After rebuilding the header with native controls, publish and test:
 7. Cart opens the Wix Stores cart.
 8. Keyboard focus is visible and follows a logical order.
 9. Mobile controls are at least about 44 × 44 CSS pixels.
+
+The current Wix coupon has no expiry date. Do not add a countdown or an end date unless the business first updates the real coupon to use that same approved date.
 
 Exact editor actions are in `docs/wix-manual-steps.md`.
