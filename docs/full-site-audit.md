@@ -17,7 +17,9 @@ The current header actions work on the published site after previous fixes. The 
 - The repository, branches, merged pull requests, and all tracked source files were inspected.
 - The published site and listed routes were inspected in a public desktop browser.
 - All Products, Search, Location, cart, checkout, member sign-up, and booking pages were checked without submitting data or payments.
-- Wix Stores V1 was queried through the Wix API. It reports 34 total products and 34 visible products.
+- Wix Stores V1 was queried through the Wix API after implementation. It reports 100 total products, 100 visible products, and 100 products with images.
+- The 66 added automotive items were also verified by expected name: none were missing, duplicated, hidden, or missing media.
+- The published All Products page reports 100 products and exposes all seven new collection links.
 - Desktop layout was measured at 1602 px document width in a 1348 px viewport.
 - Mobile and tablet viewport resizing was not available in this browser session. Those layouts remain manual tests.
 - No checkout, booking, login, form, or payment was submitted.
@@ -45,8 +47,7 @@ The current header actions work on the published site after previous fixes. The 
 | Location page contains wrong business content | `/financing` displays Black Royal rental copy and Cyberjaya details | Visibility, trust | Critical | Wix Editor |
 | Horizontal overflow | 1602 px document width in a 1348 px desktop viewport | Efficiency, responsive usability | High | Wix Editor |
 | Route names do not match purpose | `/pre-owned` is About Us; `/financing` is Location | Recognition over recall | High | Wix Editor and redirects |
-| Product count below requirement | 34 visible products; target is 100 | Assignment completeness | High | Product/content data |
-| Products are rental cars, not BROTHER'S accessories | Store shows generic US vehicle inventory and unverified prices | Relevance, trust | High | Owner confirmation and Wix Stores |
+| Commercial catalog values need confirmation | The 66 new items use project display prices and compatibility warnings; the 34 older vehicle prices also remain unverified | Relevance, trust, error prevention | High | Business confirmation and Wix Stores |
 | Placeholder testimonial | “Testimonials provide…” and “Alexa Young, CA” | Credibility, satisfaction | High | Wix Editor |
 | Placeholder category description | “This is your category description…” | Clarity | Medium | Wix Stores category settings |
 | Navigation label `CARS` | Opens All Products but does not explain whether items are products or rentals | Recognition over recall | Medium | Wix Editor |
@@ -64,7 +65,8 @@ The current header actions work on the published site after previous fixes. The 
 | All Products header action | Pass | Navigated to `/category/all-products` in the same tab |
 | Product search | Pass | `dash cam` produced a no-results message; `Tesla Model 3` returned products |
 | Location header action | Pass | Opened the confirmed Kelana Jaya Google Maps query |
-| Wix Stores catalog | Pass, incomplete content | 34 visible products returned by Wix Stores V1 API |
+| Wix Stores catalog | Pass | 100 visible products and 100 products with images returned by Wix Stores V1 API; public gallery also reports 100 |
+| Product collections | Pass | Seven new automotive collection links are visible on the published All Products page |
 | Services/booking route | Loads | `/book-online` shows three bookable services; values are unverified |
 | Cart route | Loads | `/cart-page` shows My cart and Order summary |
 | Checkout route | Not fully testable | Empty-cart visit did not expose a payment flow |
@@ -99,6 +101,15 @@ Previous pull requests repaired the bridge, and live testing now passes. The saf
 - Strict header message source and action validation.
 - Canonical accessible promotion Embed without popup navigation.
 - Route, HCI, assignment, test, evidence, content, presentation, design-system, and Wix-action documentation.
+- Reproducible 66-item automotive catalog dataset, white-background image generator, staging CSV, and implementation record.
+
+## Completed in Wix Stores
+
+- Added 66 visible automotive parts, accessories, care, safety, lighting, maintenance, brake, suspension, tyre, and wheel items.
+- Uploaded 66 clean 1200 × 1200 PNG illustrations with white backgrounds and meaningful product alt text.
+- Created and populated Accessories, Safety & Security, Car Care & Detailing, Electrical & Lighting, Engine & Maintenance, Brakes & Suspension, and Tyres & Wheels collections.
+- Reached and publicly verified the assignment target: 100 visible products with 100 images.
+- Added a compatibility, stock, installation, and final-price confirmation warning to every new item.
 
 ## Requires Wix Editor or owner data
 
@@ -106,5 +117,6 @@ Previous pull requests repaired the bridge, and live testing now passes. The saf
 - Rebuild the global header using native Wix elements.
 - Correct desktop overflow and verify mobile/tablet layouts.
 - Decide final page slugs and add redirects.
-- Confirm product/service/rental data and grow the catalog from 34 to at least 100 valid items.
+- Confirm the final prices, stock, vehicle compatibility, brands, and commercial availability of the 66 project catalog items.
+- Capture the final Wix Dashboard product-count screenshot for the assignment evidence set.
 - Configure and verify Cash, Visa, and TNG labels without claiming a real payment gateway unless verified.

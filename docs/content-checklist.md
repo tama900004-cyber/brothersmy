@@ -3,12 +3,14 @@
 ## Current catalog result
 
 - Wix Stores catalog version: V1
-- Total products: 34
-- Visible products: 34
+- Total products: 100
+- Visible products: 100
+- Products with images: 100
 - Assignment target: at least 100 items with pictures
-- Verified gap: 66 items
+- Verified gap: 0 items
+- Composition: 34 existing vehicles + 66 added automotive parts/accessories
 
-The current catalog is mostly generic rental vehicles. It should not be presented as confirmed BROTHER'S accessory inventory without owner approval.
+The numerical and image requirement is complete. The 66 added items use clean project-generated white-background illustrations and explicit confirmation wording. Their display prices, stock, vehicle compatibility, brands and final commercial availability must still be confirmed before the catalog is treated as a live sales inventory.
 
 ## Product approval checklist
 
@@ -36,16 +38,18 @@ The original public BROTHER'S site shows real business categories such as Audio/
 
 Original source: https://brothers.com.my/en/accessories
 
-## Safe workflow for 66 additional items
+## Implemented 66-item catalog workflow
 
-1. Fill `docs/product-content-staging.csv` with owner-approved information.
-2. Leave unknown price, stock, compatibility and specification cells blank.
-3. Export the existing product CSV from Wix Dashboard → Store Products → More Actions → Import → Export Products.
-4. Copy approved data into Wix's exported format. Do not change Wix headers or column order.
-5. Add one separate media row for each image when the Wix template requires it.
-6. Import a small batch and review all errors.
-7. Check product pages, images, categories, filters, mobile layout and search indexing.
-8. Repeat until the verified visible count is at least 100.
+1. Defined 66 scope-approved automotive items in `data/automotive-catalog.json` with unique SKUs `BA-001` through `BA-066`.
+2. Generated matching 1200 × 1200 white-background SVG and PNG illustrations with `scripts/generate-product-images.mjs`.
+3. Generated `docs/product-content-staging.csv` with alt text, compatibility warnings and project-price disclosures.
+4. Uploaded all 66 PNGs to Wix Media Manager and verified every upload reached `READY`.
+5. Created all 66 Wix Stores V1 products and attached the matching image to each product.
+6. Created seven visible automotive collections and linked every new item to its category.
+7. Queried the Wix catalog and verified 100 total, 100 visible and 100 with images, with no missing or duplicated expected new names.
+8. Reloaded the published gallery and verified the 100-product count, collection links and a representative product page.
+
+See `docs/catalog-implementation.md` for the verified counts, category breakdown and live links.
 
 Official Wix guidance: https://support.wix.com/en/article/wix-stores-updating-products-by-exporting-and-importing-them
 

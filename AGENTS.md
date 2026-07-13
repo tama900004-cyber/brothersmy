@@ -57,7 +57,8 @@ Do not add popup fallbacks, delayed `window.open()`, arbitrary URL messages, or 
 Verified on 2026-07-13:
 
 - All Products, Search, and Location actions work on the published site.
-- Wix Stores contains 34 visible products, not the assignment target of 100.
+- Wix Stores contains 100 visible products with images: 34 existing vehicles and 66 project catalog items added on 2026-07-13.
+- The 66 new items use scope-approved automotive categories and project-generated artwork. Their display prices, stock, fitment, and final commercial details still require business confirmation.
 - Old Black Royal and RedRoyal content remains in the footer and several pages.
 - `Order Now` and `Offers` include links to the old `blackroyal` Wix site.
 - Desktop pages overflow horizontally: 1602 px document width in a 1348 px viewport.

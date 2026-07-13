@@ -25,7 +25,9 @@ Update the Actual result column after every implementation.
 | Header | Search `dash cam` | Results or clear no-results feedback | Opened `/search?q=dash+cam` and showed no-results message | Pass |
 | Search | Search `Tesla Model 3` | Matching store product | Returned Tesla Model 3 and related results | Pass |
 | Header | Location | Confirmed Kelana Jaya map query | Opened confirmed Google Maps URL | Pass |
-| Products | Catalog count | Verified number | Wix API returned 34 visible products | Pass, requirement fails |
+| Products | Catalog count and media | At least 100 visible products with images | Wix API returned 100 visible products and 100 with images; public gallery reports 100 | Pass |
+| Products | New automotive collections | Seven populated category links | All seven links appeared on the published All Products page with verified counts totaling 66 | Pass |
+| Products | Representative new item | Correct title, price, image and warning | Digital Tyre Pressure Gauge loaded publicly with RM49, image and confirmation warning | Pass |
 | Booking | Services route | Page loads | `/book-online` loaded three services | Pass, data unverified |
 | Cart | Empty cart route | Page loads | `/cart-page` showed My cart and Order summary | Pass |
 | Members | Signed-out account entry | Login/sign-up available | `/my-subscriptions` showed Sign Up and Log In | Pass |
