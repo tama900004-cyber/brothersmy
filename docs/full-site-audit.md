@@ -52,7 +52,7 @@ The current header actions work on the published site after previous fixes. The 
 | Placeholder category description | “This is your category description…” | Clarity | Medium | Wix Stores category settings |
 | Navigation label `CARS` | Opens All Products but does not explain whether items are products or rentals | Recognition over recall | Medium | Wix Editor |
 | `My Subscriptions` in main menu | Opens Wix Members sign-up; account action is unclear | Affordance, consistency | Medium | Wix Editor |
-| Services show prices and durations not confirmed in project data | RM225, RM70, RM30 and durations appear publicly | Trust, error prevention | High | Owner confirmation |
+| Car Rental has no future class sessions | The card shows `Loading days...` because no approved schedule exists | Visibility, trust, error prevention | High | Owner schedule decision in Wix Bookings |
 | Rental claims are unverified | 24/7 support, delivery, deposits, rates, and drivers are claimed | Trust, error prevention | High | Owner confirmation |
 | Search page carries wrong footer/map | Product search works, but the surrounding page shows Black Royal content | Consistency | High | Wix Editor |
 | Third-party form script error | Console reports a PurpleBear forms app-not-found error | Feedback, performance | Medium | Wix Apps/Editor |
@@ -67,12 +67,12 @@ The current header actions work on the published site after previous fixes. The 
 | Location header action | Pass | Opened the confirmed Kelana Jaya Google Maps query |
 | Wix Stores catalog | Pass | 100 visible products and 100 products with images returned by Wix Stores V1 API; public gallery also reports 100 |
 | Product collections | Pass | Seven new automotive collection links are visible on the published All Products page |
-| Services/booking route | Loads | `/book-online` shows three bookable services; values are unverified |
+| Services/booking route | Improved | Three services require manual approval, accept in-person payment only, and use a prototype confirmation policy; Car Rental still needs a real schedule |
 | Cart route | Loads | `/cart-page` shows My cart and Order summary |
-| Checkout route | Not fully testable | Empty-cart visit did not expose a payment flow |
+| Checkout route | Blocked by configuration | A real item reached checkout, which displayed `We can’t accept online payments` and no coupon field; no order or payment was submitted |
 | Member entry | Pass | `/my-subscriptions` shows Sign Up and Log In options |
 | Contact form | Missing/unclear | No verified BROTHER'S contact form was found |
-| Coupon | Partial | WELCOME25 is visible and copy behavior exists; checkout application was not tested |
+| Coupon | Configured, UI blocked | Active 25% coupon scopes to Accessories with one use per customer; checkout application cannot be tested until Wix exposes a checkout/coupon field |
 
 ## Header root-cause analysis
 
@@ -92,7 +92,7 @@ Previous pull requests repaired the bridge, and live testing now passes. The saf
 - The document width exceeds the viewport and must be corrected before mobile submission.
 - The site has large repeated footer content and several iframes on every page.
 - Remove the broken third-party form plugin if it is unused.
-- Keep one countdown interval only and stop it when the offer expires.
+- Do not show an offer countdown unless its end date matches the approved Wix coupon configuration.
 - Avoid new animation until navigation, content, layout, and form feedback are correct.
 
 ## Completed in GitHub
@@ -110,6 +110,16 @@ Previous pull requests repaired the bridge, and live testing now passes. The saf
 - Created and populated Accessories, Safety & Security, Car Care & Detailing, Electrical & Lighting, Engine & Maintenance, Brakes & Suspension, and Tyres & Wheels collections.
 - Reached and publicly verified the assignment target: 100 visible products with 100 images.
 - Added a compatibility, stock, installation, and final-price confirmation warning to every new item.
+- Replaced all seven placeholder category descriptions with automotive-specific copy and added an All Products description.
+- Created active coupon `WELCOME25`: 25% off the Accessories collection, one use per customer, no expiry, not limited to one item.
+
+## Completed in Wix Bookings and business settings
+
+- Replaced the old Black Royal booking policy with a BROTHER'S prototype confirmation policy.
+- Enabled manual approval for all three visible services and disabled online payment/deposits.
+- Corrected the visible service descriptions without inventing availability.
+- Replaced the default location with the confirmed Kelana Jaya address, phone and daily 10:00 AM–10:00 PM schedule.
+- Updated the site display name, business name and business description to BROTHER'S.
 
 ## Requires Wix Editor or owner data
 

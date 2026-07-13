@@ -53,7 +53,7 @@ Complete these steps in order. Publish only after preview checks pass.
 5. Set the desktop height to 48 px. If text wraps on mobile, set the mobile height to 72 px.
 6. Place the Embed above the native logo/menu row.
 7. Preview at desktop and mobile widths. Verify there is no horizontal scrollbar.
-8. Test the WELCOME25 copy button and the expired-offer state.
+8. Test that the WELCOME25 button copies exactly `WELCOME25` and that `TERMS APPLY` remains visible.
 9. Publish only after native Home, Shop, Search, Location, Account and Cart controls work.
 
 ## 4. Fix Home page links and placeholder content
@@ -129,4 +129,24 @@ Complete these steps in order. Publish only after preview checks pass.
 3. Show only Cash, Visa and TNG in the assignment interface.
 4. If a method is a non-live prototype, label it `Prototype only — no payment will be processed`.
 5. Use an approved test item to reach checkout, but do not submit a real payment.
-6. Capture the payment-method screen and prototype disclosure.
+6. The published checkout currently says `We can’t accept online payments` and does not expose a coupon field. Do not claim that WELCOME25 was applied at checkout until a genuinely supported checkout method and coupon field are visible.
+7. Capture the payment-method screen and prototype disclosure.
+
+## 11. Fix the Shop product action label and search index
+
+1. Open the All Products page in Wix Editor.
+2. Select the product gallery and open its Settings / Display / Buttons controls.
+3. Change the product action text from `BOOK NOW` to `Add to Cart`, or use Wix Stores' native Add to Cart action.
+4. Confirm the action adds a store product to the cart instead of opening Wix Bookings.
+5. Open Wix Dashboard → Site Search → Search Settings.
+6. Confirm Wix Stores products are included in search and request/re-run indexing if Wix shows that option.
+7. Publish, search for `Universal Car Phone Holder`, and confirm the result count no longer relies on the old 34-product index.
+
+## 12. Handle the Car Rental loading state honestly
+
+1. Open Wix Dashboard → Booking Services → Car Rental.
+2. Keep manual approval enabled and keep online payment disabled.
+3. The service is currently a class with no future sessions, so the public card shows `Loading days...`.
+4. Do not invent dates or availability. Either add approved future sessions from the real rental schedule, or hide this service until the schedule is confirmed.
+5. If the business wants a rental enquiry instead of a class, create a new appointment-style `Vehicle Rental Enquiry` service with an approved duration and price before hiding the old class.
+6. Preview the Services page and verify every visible card has a clear state and `Request to Book` wording.
