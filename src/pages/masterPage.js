@@ -33,6 +33,10 @@ $w.onReady(function () {
     }
 
     htmlHeader.onMessage((event) => {
+        if (isWixInternalMessage(event.data)) {
+            return;
+        }
+
         const message = normalizeMessage(event.data);
 
         if (!message) {
@@ -77,6 +81,20 @@ function findHeaderComponent() {
     return null;
 }
 
+function isWixInternalMessage(data) {
+    if (!data || typeof data !== 'object') {
+        return false;
+    }
+
+    const type = typeof data.type === 'string' ? data.type : '';
+
+    return Boolean(
+        type.endsWith('Internal') ||
+        data.intent === 'TPA2' ||
+        data.namespace === 'Utils'
+    );
+}
+
 function normalizeMessage(data) {
     let rawAction;
     let query = '';
@@ -85,7 +103,7 @@ function normalizeMessage(data) {
     if (typeof data === 'string') {
         rawAction = data;
     } else if (data && typeof data === 'object') {
-        rawAction = data.action || data.type || data.command;
+        rawAction = data.action || data.command || data.type;
         query = typeof data.query === 'string' ? data.query : '';
         source = typeof data.source === 'string' ? data.source : '';
     } else {
@@ -131,12 +149,11 @@ function handleHeaderAction(message, htmlHeader) {
             break;
 
         case 'search':
-            if (!query) {
-                navigateTo(ROUTES.products);
-                break;
-            }
-
-            navigateTo(`${ROUTES.search}?q=${encodeURIComponent(query)}`);
+            navigateTo(
+                query
+                    ? `${ROUTES.search}?q=${encodeURIComponent(query)}`
+                    : ROUTES.products
+            );
             break;
 
         case 'location':
