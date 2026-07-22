@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BROTHER'S Request Form</title>
+  <style>
+    :root{color-scheme:dark;--red:#e31b23;--red2:#ff3038;--black:#000;--panel:#0b0b0c;--soft:#131315;--line:#2a2a2d;--muted:#a7a7ac;--white:#fff;--ok:#c9f7d7;--okbg:#102f1c;--bad:#ffd4d6;--badbg:#381316}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--black);color:var(--white);font-family:Arial,Helvetica,sans-serif}
+    body{padding:clamp(8px,2.5vw,26px)}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .shell{width:min(860px,100%);margin:auto;overflow:hidden;border:1px solid var(--line);border-radius:20px;background:linear-gradient(150deg,#111113 0%,#050505 58%);box-shadow:0 28px 80px rgba(0,0,0,.55)}
+    .hero{position:relative;padding:clamp(24px,5vw,44px);border-bottom:1px solid var(--line);background:radial-gradient(circle at 90% 0,rgba(227,27,35,.24),transparent 42%)}
+    .hero:after{content:"";position:absolute;right:clamp(20px,5vw,45px);bottom:0;width:62px;height:4px;border-radius:4px 4px 0 0;background:var(--red)}
+    .eyebrow{margin:0 0 10px;color:#ff4b51;font-size:11px;font-weight:800;letter-spacing:.18em}
+    h1{margin:0;max-width:650px;font-size:clamp(31px,6vw,54px);line-height:1;letter-spacing:-.045em}
+    .hero-copy{max-width:650px;margin:14px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+    .body{padding:clamp(18px,4vw,36px)}
+    .tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:22px;padding:5px;border:1px solid #232326;border-radius:13px;background:#080809}
+    .tab{min-height:46px;border:0;border-radius:9px;background:transparent;color:#999;font-size:13px;font-weight:800}
+    .tab.active{background:var(--red);color:white;box-shadow:0 7px 20px rgba(227,27,35,.22)}
+    .selection{display:none;margin:0 0 20px;padding:14px 15px;border:1px solid rgba(227,27,35,.5);border-radius:12px;background:rgba(227,27,35,.08)}
+    .selection.show{display:flex;align-items:center;gap:11px}
+    .selection-mark{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:50%;background:var(--red);font-size:13px;font-weight:900}
+    .selection small{display:block;margin-bottom:3px;color:#d2d2d5;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+    .selection strong{font-size:14px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .field{display:flex;flex-direction:column;gap:7px}
+    .full{grid-column:1/-1}
+    label{font-size:12px;font-weight:800;color:#e5e5e7}
+    .hint{color:#7f7f84;font-size:11px;font-weight:400}
+    input,select,textarea{width:100%;border:1px solid #36363a;border-radius:10px;background:#0d0d0f;color:white;padding:13px 14px;font-size:14px;outline:none;transition:border-color .18s,box-shadow .18s}
+    textarea{min-height:105px;resize:vertical;line-height:1.5}
+    input:focus,select:focus,textarea:focus{border-color:var(--red2);box-shadow:0 0 0 3px rgba(227,27,35,.18)}
+    input[readonly]{border-color:#2a2a2d;background:#080809;color:#d5d5d8}
+    .hidden{display:none!important}
+    .hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important}
+    .payment{display:flex;align-items:center;gap:12px;margin-top:19px;padding:14px;border:1px solid var(--line);border-radius:11px;background:#0b0b0c}
+    .coin{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:50%;background:var(--red);font-size:12px;font-weight:900}
+    .payment b{display:block;font-size:13px}
+    .payment span{display:block;margin-top:2px;color:#929298;font-size:11px}
+    .privacy{margin:14px 0 0;color:#85858b;font-size:11px;line-height:1.55}
+    .submit{width:100%;min-height:50px;margin-top:17px;border:0;border-radius:11px;background:var(--red);color:white;font-size:14px;font-weight:900;letter-spacing:.03em;transition:background .18s,transform .18s}
+    .submit:hover{background:var(--red2);transform:translateY(-1px)}
+    .submit:disabled{opacity:.55;cursor:wait;transform:none}
+    .status{display:none;margin-top:14px;padding:13px 14px;border-radius:10px;font-size:13px;line-height:1.5}
+    .status.show{display:block}
+    .status.bad{background:var(--badbg);color:var(--bad)}
+    .success{display:none;padding:clamp(22px,5vw,44px)}
+    .success.show{display:block}
+    .success-icon{display:grid;place-items:center;width:54px;height:54px;margin-bottom:18px;border-radius:50%;background:var(--okbg);color:var(--ok);font-size:25px;font-weight:900}
+    .success h2{margin:0;font-size:clamp(28px,5vw,42px);letter-spacing:-.035em}
+    .success-copy{margin:11px 0 22px;color:var(--muted);font-size:14px;line-height:1.6}
+    .reference{display:inline-block;margin-bottom:18px;padding:9px 12px;border:1px solid rgba(227,27,35,.5);border-radius:8px;background:rgba(227,27,35,.08);color:#ff656b;font-size:13px;font-weight:900;letter-spacing:.07em}
+    .summary{margin:0;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#09090a}
+    .summary-row{display:grid;grid-template-columns:minmax(110px,.65fr) 1.35fr;gap:14px;padding:13px 15px;border-bottom:1px solid #202023}
+    .summary-row:last-child{border-bottom:0}
+    .summary dt{color:#8f8f95;font-size:12px}
+    .summary dd{margin:0;overflow-wrap:anywhere;color:#f2f2f3;font-size:13px;font-weight:700}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+    .action{min-height:46px;border-radius:10px;font-size:13px;font-weight:800}
+    .action.primary{border:0;background:var(--red);color:white}
+    .action.secondary{border:1px solid #414146;background:transparent;color:white}
+    @media(max-width:620px){body{padding:6px}.shell{border-radius:14px}.grid{grid-template-columns:1fr}.full{grid-column:auto}.hero,.body,.success{padding-left:16px;padding-right:16px}.summary-row{grid-template-columns:1fr;gap:5px}.actions{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section id="requestView">
+      <header class="hero">
+        <p class="eyebrow">BROTHER'S MALAYSIA</p>
+        <h1 id="pageTitle">Request your vehicle.</h1>
+        <p id="pageCopy" class="hero-copy">Share the basic details. Our team will confirm availability and contact you before any payment.</p>
+      </header>
+      <div class="body">
+        <div class="tabs" role="tablist" aria-label="Request type">
+          <button class="tab active" type="button" data-type="vehicle" role="tab" aria-selected="true">Vehicle</button>
+          <button class="tab" type="button" data-type="spareParts" role="tab" aria-selected="false">Spare Parts</button>
+        </div>
+
+        <div id="selection" class="selection" aria-live="polite">
+          <div class="selection-mark">✓</div>
+          <div><small>Selected item</small><strong id="selectionName"></strong></div>
+        </div>
+
+        <form id="requestForm" novalidate>
+          <input id="requestType" type="hidden" value="vehicle">
+          <input id="productId" type="hidden">
+          <input id="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <div class="grid">
+            <div class="field">
+              <label for="fullName">Full name *</label>
+              <input id="fullName" required maxlength="80" autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="phone">Phone / WhatsApp *</label>
+              <input id="phone" required maxlength="30" inputmode="tel" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="email">Email <span class="hint">optional</span></label>
+              <input id="email" type="email" maxlength="120" autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="contactMethod">Preferred contact</label>
+              <select id="contactMethod"><option>WhatsApp</option><option>Phone Call</option><option>Email</option></select>
+            </div>
+
+            <div class="field vehicle-field">
+              <label for="requestPurpose">What would you like?</label>
+              <select id="requestPurpose"><option>Car Rental</option><option>Purchase</option><option>Request a Price</option><option>Viewing</option><option>Test Drive</option></select>
+            </div>
+            <div class="field vehicle-field">
+              <label for="productName">Vehicle name / model *</label>
+              <input id="productName" required maxlength="100" placeholder="Example: Toyota Vios">
+            </div>
+            <div class="field vehicle-field non-rental-field hidden">
+              <label for="preferredDate">Preferred date</label>
+              <input id="preferredDate" type="date">
+            </div>
+            <div class="field vehicle-field non-rental-field hidden">
+              <label for="preferredTime">Preferred time</label>
+              <input id="preferredTime" type="time">
+            </div>
+            <div class="field vehicle-field rental-field">
+              <label for="rentalStart">Rental start *</label>
+              <input id="rentalStart" type="date">
+            </div>
+            <div class="field vehicle-field rental-field">
+              <label for="rentalEnd">Return date *</label>
+              <input id="rentalEnd" type="date">
+            </div>
+
+            <div class="field part-field hidden">
+              <label for="partName">Spare part *</label>
+              <input id="partName" maxlength="100" placeholder="Part name or product code">
+            </div>
+            <div class="field part-field hidden">
+              <label for="quantity">Quantity</label>
+              <input id="quantity" type="number" min="1" max="50" value="1">
+            </div>
+            <div class="field part-field hidden">
+              <label for="vehicleMakeModel">Your car make and model *</label>
+              <input id="vehicleMakeModel" maxlength="100" placeholder="Example: Honda City">
+            </div>
+            <div class="field part-field hidden">
+              <label for="vehicleYear">Vehicle year <span class="hint">optional</span></label>
+              <input id="vehicleYear" maxlength="10" inputmode="numeric" placeholder="Example: 2022">
+            </div>
+            <div class="field part-field hidden">
+              <label for="partCondition">Part type</label>
+              <select id="partCondition"><option>New</option><option>Used</option><option>Either</option></select>
+            </div>
+            <div class="field part-field hidden">
+              <label for="installationRequired">Installation</label>
+              <select id="installationRequired"><option value="true">Required</option><option value="false">Not required</option></select>
+            </div>
+            <div class="field full part-field hidden">
+              <label for="deliveryAddress">Delivery / contact address *</label>
+              <textarea id="deliveryAddress" maxlength="300" autocomplete="street-address" placeholder="House or unit, street, area, postcode and state"></textarea>
+            </div>
+            <div class="field full">
+              <label for="notes">Extra details <span class="hint">optional</span></label>
+              <textarea id="notes" maxlength="1000" placeholder="Colour, specification, part number, preferred collection time, or anything that helps us prepare."></textarea>
+            </div>
+          </div>
+
+          <div class="payment">
+            <div class="coin">RM</div>
+            <div><b>Cash at Store</b><span>No payment is taken in this form. Availability and final price are confirmed first.</span></div>
+          </div>
+          <p class="privacy">By submitting, you allow BROTHER'S to contact you about this request. Your personal details are stored privately.</p>
+          <button id="submitButton" class="submit" type="submit">SUBMIT VEHICLE REQUEST</button>
+          <div id="status" class="status" role="alert" aria-live="assertive"></div>
+        </form>
+      </div>
+    </section>
+
+    <section id="successView" class="success" aria-live="polite">
+      <div class="success-icon">✓</div>
+      <p class="eyebrow">REQUEST SAVED</p>
+      <h2>Thank you. We have your request.</h2>
+      <p class="success-copy">Keep the reference number below. Our team will contact you to confirm availability, compatibility and the next step.</p>
+      <div id="reference" class="reference"></div>
+      <dl id="summary" class="summary"></dl>
+      <div class="actions">
+        <button id="printSummary" class="action secondary" type="button">PRINT SUMMARY</button>
+        <button id="newRequest" class="action primary" type="button">START ANOTHER REQUEST</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const ENDPOINT='https://tama900004.wixsite.com/brothersmy/_functions/submitCustomerRequest';
+    const SOURCE='brothersRequestForm';
+    const PARENT_SOURCE='brothersWix';
+    const byId=(id)=>document.getElementById(id);
+    const form=byId('requestForm');
+    const statusBox=byId('status');
+    const submitButton=byId('submitButton');
+    let initialContext={requestType:'vehicle',productName:'',productId:'',fullName:'',email:'',phone:''};
+
+    function setRequestType(type){
+      const safeType=type==='spareParts'?'spareParts':'vehicle';
+      const selectedForType=safeType===initialContext.requestType&&Boolean(initialContext.productName);
+      byId('requestType').value=safeType;
+      byId('productId').value=selectedForType?initialContext.productId:'';
+      if(safeType==='vehicle'){
+        byId('productName').readOnly=selectedForType;
+        if(selectedForType)byId('productName').value=initialContext.productName;
+      }else{
+        byId('partName').readOnly=selectedForType;
+        if(selectedForType)byId('partName').value=initialContext.productName;
+      }
+      document.querySelectorAll('.tab').forEach((tab)=>{
+        const active=tab.dataset.type===safeType;
+        tab.classList.toggle('active',active);
+        tab.setAttribute('aria-selected',String(active));
+      });
+      document.querySelectorAll('.vehicle-field').forEach((field)=>field.classList.toggle('hidden',safeType!=='vehicle'));
+      document.querySelectorAll('.part-field').forEach((field)=>field.classList.toggle('hidden',safeType!=='spareParts'));
+      byId('pageTitle').textContent=safeType==='vehicle'?'Request your vehicle.':'Request your spare part.';
+      byId('pageCopy').textContent=safeType==='vehicle'
+        ?'Share the basic details. Our team will confirm vehicle availability and contact you before any payment.'
+        :'Tell us the part and your vehicle details. We will confirm compatibility, availability and final price.';
+      submitButton.textContent=safeType==='vehicle'?'SUBMIT VEHICLE REQUEST':'SUBMIT SPARE PART REQUEST';
+      updateVehicleDateFields();
+      updateSelection();
+      clearStatus();
+    }
+
+    function updateVehicleDateFields(){
+      const rental=byId('requestType').value==='vehicle'&&byId('requestPurpose').value==='Car Rental';
+      document.querySelectorAll('.rental-field').forEach((field)=>field.classList.toggle('hidden',!rental));
+      document.querySelectorAll('.non-rental-field').forEach((field)=>field.classList.toggle('hidden',rental));
+    }
+
+    function applyContext(context){
+      initialContext={...initialContext,...context};
+      setValue('fullName',initialContext.fullName);
+      setValue('email',initialContext.email);
+      setValue('phone',initialContext.phone);
+      setValue('productId',initialContext.productId);
+      if(initialContext.requestType==='spareParts'){
+        setValue('partName',initialContext.productName);
+        byId('partName').readOnly=Boolean(initialContext.productName);
+      }else{
+        setValue('productName',initialContext.productName);
+        byId('productName').readOnly=Boolean(initialContext.productName);
+      }
+      setRequestType(initialContext.requestType);
+    }
+
+    function setValue(id,value){
+      if(value!==undefined&&value!==null&&String(value).trim())byId(id).value=String(value).trim();
+    }
+
+    function updateSelection(){
+      const type=byId('requestType').value;
+      const name=type==='vehicle'?byId('productName').value.trim():byId('partName').value.trim();
+      byId('selectionName').textContent=name;
+      byId('selection').classList.toggle('show',Boolean(name));
+    }
+
+    function clearStatus(){
+      statusBox.textContent='';
+      statusBox.className='status';
+    }
+
+    function showError(message){
+      statusBox.textContent=message;
+      statusBox.className='status show bad';
+      statusBox.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+
+    function validate(payload){
+      const phoneDigits=payload.phone.replace(/\D/g,'');
+      if(payload.fullName.length<2)return 'Please enter your full name.';
+      if(phoneDigits.length<7||phoneDigits.length>15)return 'Please enter a valid phone number.';
+      if(payload.email&&!/^\S+@\S+\.\S+$/.test(payload.email))return 'Please enter a valid email or leave it empty.';
+      if(payload.requestType==='vehicle'){
+        if(!payload.productName)return 'Please enter or select a vehicle.';
+        if(payload.requestPurpose==='Car Rental'){
+          if(!payload.rentalStart||!payload.rentalEnd)return 'Please select the rental start and return dates.';
+          if(payload.rentalEnd<payload.rentalStart)return 'Return date must be after the rental start date.';
+        }
+      }
+      if(payload.requestType==='spareParts'){
+        if(!payload.partName)return 'Please enter or select the spare part.';
+        if(!payload.vehicleMakeModel)return 'Please enter your car make and model.';
+        if(!payload.deliveryAddress)return 'Please enter the delivery or contact address.';
+      }
+      return '';
+    }
+
+    function getPayload(){
+      const type=byId('requestType').value;
+      return {
+        requestType:type,
+        fullName:byId('fullName').value.trim(),
+        phone:byId('phone').value.trim(),
+        email:byId('email').value.trim(),
+        contactMethod:byId('contactMethod').value,
+        requestPurpose:type==='vehicle'?byId('requestPurpose').value:'Spare Part Request',
+        productName:type==='vehicle'?byId('productName').value.trim():'',
+        productId:byId('productId').value.trim(),
+        preferredDate:type==='vehicle'?byId('preferredDate').value:'',
+        preferredTime:type==='vehicle'?byId('preferredTime').value:'',
+        rentalStart:type==='vehicle'?byId('rentalStart').value:'',
+        rentalEnd:type==='vehicle'?byId('rentalEnd').value:'',
+        partName:type==='spareParts'?byId('partName').value.trim():'',
+        quantity:type==='spareParts'?Number(byId('quantity').value||1):1,
+        vehicleMakeModel:type==='spareParts'?byId('vehicleMakeModel').value.trim():'',
+        vehicleYear:type==='spareParts'?byId('vehicleYear').value.trim():'',
+        partCondition:type==='spareParts'?byId('partCondition').value:'',
+        installationRequired:type==='spareParts'&&byId('installationRequired').value==='true',
+        deliveryAddress:type==='spareParts'?byId('deliveryAddress').value.trim():'',
+        paymentMethod:'Cash at Store',
+        notes:byId('notes').value.trim(),
+        company:byId('company').value,
+        source:'Wix request form'
+      };
+    }
+
+    async function submitRequest(event){
+      event.preventDefault();
+      clearStatus();
+      const payload=getPayload();
+      if(payload.company)return;
+      const error=validate(payload);
+      if(error){showError(error);return;}
+
+      submitButton.disabled=true;
+      submitButton.textContent='SAVING REQUEST...';
+      try{
+        const response=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const result=await response.json().catch(()=>({}));
+        if(!response.ok||!result.ok)throw new Error(result.message||'The request could not be saved.');
+        showSummary(payload,result.reference);
+      }catch(error){
+        showError(error.message||'The request could not be saved. Please try again.');
+      }finally{
+        submitButton.disabled=false;
+        submitButton.textContent=byId('requestType').value==='vehicle'?'SUBMIT VEHICLE REQUEST':'SUBMIT SPARE PART REQUEST';
+      }
+    }
+
+    function showSummary(payload,reference){
+      const rows=[
+        ['Request',payload.requestType==='vehicle'?'Vehicle':'Spare Parts'],
+        [payload.requestType==='vehicle'?'Vehicle':'Part',payload.requestType==='vehicle'?payload.productName:payload.partName],
+        ['Name',payload.fullName],
+        ['Phone',payload.phone],
+        ['Contact by',payload.contactMethod]
+      ];
+      if(payload.requestType==='vehicle'){
+        rows.push(['Purpose',payload.requestPurpose]);
+        if(payload.requestPurpose==='Car Rental')rows.push(['Rental dates',`${payload.rentalStart} to ${payload.rentalEnd}`]);
+        else if(payload.preferredDate)rows.push(['Preferred date',`${payload.preferredDate}${payload.preferredTime?' at '+payload.preferredTime:''}`]);
+      }else{
+        rows.push(['For vehicle',`${payload.vehicleMakeModel}${payload.vehicleYear?' ('+payload.vehicleYear+')':''}`]);
+        rows.push(['Quantity',String(payload.quantity)]);
+        rows.push(['Address',payload.deliveryAddress]);
+      }
+      byId('reference').textContent=`REFERENCE: ${reference}`;
+      byId('summary').replaceChildren(...rows.filter((row)=>row[1]).map(createSummaryRow));
+      byId('requestView').classList.add('hidden');
+      byId('successView').classList.add('show');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function createSummaryRow([label,value]){
+      const row=document.createElement('div');
+      row.className='summary-row';
+      const term=document.createElement('dt');
+      const detail=document.createElement('dd');
+      term.textContent=label;
+      detail.textContent=value;
+      row.append(term,detail);
+      return row;
+    }
+
+    function startAnotherRequest(){
+      form.reset();
+      byId('partName').readOnly=false;
+      byId('productName').readOnly=false;
+      byId('successView').classList.remove('show');
+      byId('requestView').classList.remove('hidden');
+      applyContext(initialContext);
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    document.querySelectorAll('.tab').forEach((tab)=>tab.addEventListener('click',()=>setRequestType(tab.dataset.type)));
+    byId('requestPurpose').addEventListener('change',updateVehicleDateFields);
+    byId('productName').addEventListener('input',updateSelection);
+    byId('partName').addEventListener('input',updateSelection);
+    byId('newRequest').addEventListener('click',startAnotherRequest);
+    byId('printSummary').addEventListener('click',()=>window.print());
+    form.addEventListener('submit',submitRequest);
+    window.addEventListener('message',(event)=>{
+      const message=event.data||{};
+      if(message.source===PARENT_SOURCE&&message.type==='requestFormInit')applyContext(message.payload||{});
+    });
+
+    setRequestType('vehicle');
+    window.parent.postMessage({source:SOURCE,type:'ready'},'*');
+  </script>
+</body>
+</html>

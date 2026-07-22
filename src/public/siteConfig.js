@@ -23,3 +23,10 @@ export const ROUTES = Object.freeze({
     search: '/search',
     maps: 'https://www.google.com/maps/search/?api=1&query=No.10%20Jalan%20SS6%2F12%2C%20Kelana%20Jaya%2C%2047301%20Petaling%20Jaya%2C%20Selangor%2C%20Malaysia'
 });
+
+export const REQUEST_FORM = Object.freeze({
+    route: '/new-inventory',
+    componentIds: Object.freeze(['#htmlRequestForm', '#html1', '#html3']),
+    inboundSource: 'brothersRequestForm',
+    outboundSource: 'brothersWix'
+});
