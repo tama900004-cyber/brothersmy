@@ -81,6 +81,11 @@ function validateCustomer(customer) {
 }
 
 function orderLineItem(item) {
+  const zeroMoney = {
+    amount: '0',
+    formattedAmount: 'RM 0.00'
+  };
+
   return {
     id: item._id || item.id,
     productName: item.productName,
@@ -91,10 +96,15 @@ function orderLineItem(item) {
     physicalProperties: item.physicalProperties,
     itemType: item.itemType,
     price: item.price,
-    totalDiscount: item.discount,
+    totalDiscount: item.totalDiscount || item.discount || zeroMoney,
     totalPriceBeforeTax: item.totalPriceBeforeTax,
     totalPriceAfterTax: item.totalPriceAfterTax,
-    paymentOption: 'FULL_PAYMENT_OFFLINE'
+    paymentOption: 'FULL_PAYMENT_OFFLINE',
+    taxDetails: item.taxDetails || {
+      taxRate: '0',
+      totalTax: zeroMoney
+    },
+    locations: item.locations || []
   };
 }
 
@@ -148,42 +158,73 @@ export const placeCounterOrder = webMethod(Permissions.Anyone, async (customerIn
   const checkoutData = await getCurrentCheckout();
   const summary = sanitizeCheckout(checkoutData);
   const name = splitName(customer.fullName);
+  const collectionAddress = {
+    country: 'MY',
+    subdivision: 'MY-10',
+    city: 'Petaling Jaya',
+    postalCode: '47301',
+    addressLine: 'No.17C, Jalan SS6/12, Kelana Jaya',
+    countryFullname: 'Malaysia',
+    subdivisionFullname: 'Selangor'
+  };
+  const contactDetails = {
+    firstName: name.firstName,
+    lastName: name.lastName,
+    phone: customer.phone
+  };
 
   const orderDraft = {
     lineItems: (checkoutData.lineItems || []).map(orderLineItem),
     priceSummary: checkoutData.priceSummary,
     currency: checkoutData.currency || 'MYR',
     weightUnit: checkoutData.weightUnit || 'KG',
+    taxIncludedInPrices: Boolean(
+      checkoutData.taxIncludedInPrices ?? checkoutData.taxIncludedInPrice
+    ),
     status: 'APPROVED',
     paymentStatus: 'NOT_PAID',
     channelInfo: { type: 'BACKOFFICE_MERCHANT' },
     buyerLanguage: checkoutData.buyerLanguage || 'en',
+    seenByAHuman: false,
     buyerNote: "Cash at counter. Present the order number at the BROTHER'S cashier.",
     buyerInfo: customer.email ? { email: customer.email } : undefined,
     billingInfo: {
-      address: {
-        country: 'MY',
-        subdivision: 'MY-10',
-        city: 'Petaling Jaya',
-        postalCode: '47301',
-        addressLine: 'No.17C, Jalan SS6/12, Kelana Jaya',
-        countryFullname: 'Malaysia',
-        subdivisionFullname: 'Selangor'
-      },
-      contactDetails: {
-        firstName: name.firstName,
-        lastName: name.lastName,
-        phone: customer.phone
-      }
+      address: collectionAddress,
+      contactDetails
+    },
+    recipientInfo: {
+      address: collectionAddress,
+      contactDetails
     },
     balanceSummary: { balance: checkoutData.priceSummary?.total }
   };
 
-  const created = await elevatedCreateOrder(orderDraft);
+  let created;
+
+  try {
+    created = await elevatedCreateOrder(orderDraft);
+  } catch (error) {
+    console.error('[BROTHERS counter order] Order creation failed:', {
+      message: error?.message,
+      code: error?.code,
+      details: error?.details
+    });
+    throw new Error('We could not reserve the order. Please try again.');
+  }
+
   const order = created.order || created;
   if (!order?.number) throw new Error('The order number could not be created.');
 
-  await currentCart.deleteCurrentCart();
+  // The order already exists at this point. A cart cleanup failure must not
+  // turn a successful reservation into an error or tempt the buyer to retry.
+  try {
+    await currentCart.deleteCurrentCart();
+  } catch (error) {
+    console.warn('[BROTHERS counter order] Order created, but cart cleanup failed:', {
+      orderId: order._id || order.id,
+      message: error?.message
+    });
+  }
 
   return {
     orderId: order._id || order.id,
