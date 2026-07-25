@@ -15,13 +15,29 @@ export const HEADER_BRIDGE = Object.freeze({
 
 export const ROUTES = Object.freeze({
     home: '/',
-    shop: '/category/all-products',
+    shop: '/category/parts',
+    products: '/category/parts',
+    cars: '/category/cars',
+    accessories: '/category/accessories',
     services: '/book-online',
     rental: '/new-inventory',
     about: '/pre-owned',
     locationPage: '/financing',
     search: '/search',
     maps: 'https://www.google.com/maps/search/?api=1&query=No.10%20Jalan%20SS6%2F12%2C%20Kelana%20Jaya%2C%2047301%20Petaling%20Jaya%2C%20Selangor%2C%20Malaysia'
+});
+
+export const STORE_COLLECTIONS = Object.freeze({
+    cars: '21583df3-406d-6eb8-20ea-ef607ff05d1b',
+    spareParts: '28305e7d-c1fc-40b4-91be-145827cf12a0',
+    accessories: 'a734bbe9-9153-4c4b-b966-a62fefe7cf67'
+});
+
+export const PROMOTION = Object.freeze({
+    code: 'WELCOME25',
+    discountRate: 25,
+    collectionId: STORE_COLLECTIONS.accessories,
+    currency: 'MYR'
 });
 
 export const REQUEST_FORM = Object.freeze({
