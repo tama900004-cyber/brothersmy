@@ -58,9 +58,19 @@ $w.onReady(async function () {
 
 async function routeCheckoutToPaymentOptions() {
     try {
-        await ensureCheckoutRoute();
+        const result = await ensureCheckoutRoute();
+
+        // Wix keeps the native Side Cart and Cart Page state cached after a
+        // programmatic cart update. Refreshing here makes their Checkout links
+        // pick up overrideCheckoutUrl immediately.
+        if (result?.updated) {
+            await wixEcomFrontend.refreshCart();
+        }
+
+        return result;
     } catch (error) {
         console.warn('[BROTHERS checkout] Could not update the checkout route:', error);
+        return null;
     }
 }
 
