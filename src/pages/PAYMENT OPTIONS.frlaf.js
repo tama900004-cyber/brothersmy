@@ -42,7 +42,7 @@ $w.onReady(function () {
 });
 
 function findPaymentFrame() {
-  for (const selector of ['#html1', '#html2', '#html3', '#html4']) {
+  for (const selector of ['#paymentFrame', '#html7']) {
     try {
       const component = $w(selector);
       if (
