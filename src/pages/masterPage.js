@@ -15,6 +15,7 @@ const ACTION_ALIASES = Object.freeze({
 });
 
 $w.onReady(function () {
+    fixNativeCarsMenu();
     const htmlHeader = findHeaderComponent();
 
     if (!htmlHeader) {
@@ -49,6 +50,42 @@ $w.onReady(function () {
         componentId: htmlHeader.id
     });
 });
+
+
+function fixNativeCarsMenu() {
+    const menuSelector = '#comp-mrhg15xp';
+    const carsRoute = '/category/cars';
+
+    try {
+        const menu = $w(menuSelector);
+
+        if (!menu || !Array.isArray(menu.menuItems)) {
+            return;
+        }
+
+        const updateItems = (items) => items.map((item) => {
+            const children = Array.isArray(item.children)
+                ? updateItems(item.children)
+                : item.children;
+            const isCarsItem = String(item.label || '').trim().toLowerCase() === 'cars';
+
+            return {
+                ...item,
+                ...(isCarsItem ? { link: carsRoute, target: '_self' } : {}),
+                ...(Array.isArray(children) ? { children } : {})
+            };
+        });
+
+        const updatedItems = updateItems(menu.menuItems);
+        const changed = JSON.stringify(updatedItems) !== JSON.stringify(menu.menuItems);
+
+        if (changed) {
+            menu.menuItems = updatedItems;
+        }
+    } catch (error) {
+        console.warn('[BROTHERS menu] Could not update Cars link:', error);
+    }
+}
 
 function findHeaderComponent() {
     for (const selector of HEADER_BRIDGE.componentIds) {
