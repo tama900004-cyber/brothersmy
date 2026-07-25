@@ -3,6 +3,11 @@ import wixData from 'wix-data';
 
 const COLLECTION = 'CustomerRequests';
 const ALLOWED_TYPES = new Set(['vehicle', 'spareParts']);
+const ALLOWED_PAYMENT_METHODS = new Set([
+    'Cash at Store',
+    'Visa at Store',
+    'Touch ’n Go at Store'
+]);
 const ALLOWED_ORIGIN_PARTS = [
     'tama900004.wixsite.com',
     'htmlcomponentservice.com',
@@ -47,12 +52,16 @@ export async function post_submitCustomerRequest(request) {
 
 function validateRequest(data) {
     const requestType = cleanText(data?.requestType, 30);
+    const paymentMethod = cleanText(data?.paymentMethod, 30) || 'Cash at Store';
     const fullName = cleanText(data?.fullName, 80);
     const phone = cleanText(data?.phone, 30);
     const phoneDigits = phone.replace(/\D/g, '');
 
     if (!ALLOWED_TYPES.has(requestType)) {
         return 'Choose a valid request type.';
+    }
+    if (!ALLOWED_PAYMENT_METHODS.has(paymentMethod)) {
+        return 'Choose a valid payment preference.';
     }
     if (fullName.length < 2) {
         return 'Enter your full name.';
@@ -124,7 +133,7 @@ function buildItem(data, reference) {
         preferredTime: cleanText(data.preferredTime, 10),
         rentalStart: parseDate(data.rentalStart),
         rentalEnd: parseDate(data.rentalEnd),
-        paymentMethod: 'Cash at Store',
+        paymentMethod: cleanText(data.paymentMethod, 30) || 'Cash at Store',
         notes: cleanText(data.notes, 1000),
         source: cleanText(data.source, 80) || 'Website request form'
     };
