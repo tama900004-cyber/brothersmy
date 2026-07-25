@@ -1,5 +1,5 @@
 import wixLocationFrontend from 'wix-location-frontend';
-import { REQUEST_FORM } from 'public/siteConfig';
+import { PROMOTION, REQUEST_FORM } from 'public/siteConfig';
 
 const CARS_COLLECTION_ID = '21583df3-406d-6eb8-20ea-ef607ff05d1b';
 const SPARE_PARTS_COLLECTION_ID = '28305e7d-c1fc-40b4-91be-145827cf12a0';
@@ -110,13 +110,39 @@ function getCollectionIds(product) {
 }
 
 function buildRequestUrl(product, requestType) {
+    const collectionIds = getCollectionIds(product);
+    const unitPrice = getProductPrice(product);
     const query = new URLSearchParams({
         type: requestType,
         product: String(product.name || ''),
-        productId: String(product._id || product.id || '')
+        productId: String(product._id || product.id || ''),
+        unitPrice: unitPrice > 0 ? unitPrice.toFixed(2) : '',
+        currency: getProductCurrency(product),
+        couponEligible: String(
+            requestType === 'spareParts' &&
+            collectionIds.includes(PROMOTION.collectionId)
+        )
     });
 
     return `${REQUEST_FORM.route}?${query.toString()}`;
+}
+
+function getProductPrice(product) {
+    const value = product?.priceData?.discountedPrice ??
+        product?.priceData?.price ??
+        product?.price?.discountedPrice ??
+        product?.price?.price ??
+        product?.price;
+    const number = Number(value);
+    return Number.isFinite(number) && number > 0 ? number : 0;
+}
+
+function getProductCurrency(product) {
+    return String(
+        product?.priceData?.currency ||
+        product?.price?.currency ||
+        PROMOTION.currency
+    ).trim().toUpperCase().slice(0, 3);
 }
 
 function findElement(selector) {
