@@ -1,5 +1,7 @@
 import wixLocationFrontend from 'wix-location-frontend';
+import wixEcomFrontend from 'wix-ecom-frontend';
 import { HEADER_BRIDGE, ROUTES } from 'public/siteConfig';
+import { ensureCheckoutRoute } from 'backend/counterOrders.web';
 
 const ACTION_ALIASES = Object.freeze({
     home: 'home',
@@ -14,8 +16,11 @@ const ACTION_ALIASES = Object.freeze({
     maps: 'location'
 });
 
-$w.onReady(function () {
+$w.onReady(async function () {
     fixNativeCarsMenu();
+    await routeCheckoutToPaymentOptions();
+    wixEcomFrontend.onCartChange(routeCheckoutToPaymentOptions);
+
     const htmlHeader = findHeaderComponent();
 
     if (!htmlHeader) {
@@ -51,6 +56,13 @@ $w.onReady(function () {
     });
 });
 
+async function routeCheckoutToPaymentOptions() {
+    try {
+        await ensureCheckoutRoute();
+    } catch (error) {
+        console.warn('[BROTHERS checkout] Could not update the checkout route:', error);
+    }
+}
 
 function fixNativeCarsMenu() {
     const menuSelector = '#comp-mrhg15xp';
