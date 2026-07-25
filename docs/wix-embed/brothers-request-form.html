@@ -165,11 +165,19 @@
               <label for="notes">Extra details <span class="hint">optional</span></label>
               <textarea id="notes" maxlength="1000" placeholder="Colour, specification, part number, preferred collection time, or anything that helps us prepare."></textarea>
             </div>
+            <div class="field full">
+              <label for="paymentMethod">Payment preference *</label>
+              <select id="paymentMethod" required>
+                <option>Cash at Store</option>
+                <option>Visa at Store</option>
+                <option>Touch ’n Go at Store</option>
+              </select>
+            </div>
           </div>
 
           <div class="payment">
             <div class="coin">RM</div>
-            <div><b>Cash at Store</b><span>No payment is taken in this form. Availability and final price are confirmed first.</span></div>
+            <div><b>Payment after confirmation</b><span>No payment is taken in this form. Cash, Visa and Touch ’n Go are handled at the store after availability and final price are confirmed.</span></div>
           </div>
           <p class="privacy">By submitting, you allow BROTHER'S to contact you about this request. Your personal details are stored privately.</p>
           <button id="submitButton" class="submit" type="submit">SUBMIT VEHICLE REQUEST</button>
@@ -232,9 +240,10 @@
     }
 
     function updateVehicleDateFields(){
-      const rental=byId('requestType').value==='vehicle'&&byId('requestPurpose').value==='Car Rental';
+      const vehicle=byId('requestType').value==='vehicle';
+      const rental=vehicle&&byId('requestPurpose').value==='Car Rental';
       document.querySelectorAll('.rental-field').forEach((field)=>field.classList.toggle('hidden',!rental));
-      document.querySelectorAll('.non-rental-field').forEach((field)=>field.classList.toggle('hidden',rental));
+      document.querySelectorAll('.non-rental-field').forEach((field)=>field.classList.toggle('hidden',!vehicle||rental));
     }
 
     function applyContext(context){
@@ -317,7 +326,7 @@
         partCondition:type==='spareParts'?byId('partCondition').value:'',
         installationRequired:type==='spareParts'&&byId('installationRequired').value==='true',
         deliveryAddress:type==='spareParts'?byId('deliveryAddress').value.trim():'',
-        paymentMethod:'Cash at Store',
+        paymentMethod:byId('paymentMethod').value,
         notes:byId('notes').value.trim(),
         company:byId('company').value,
         source:'Wix request form'
@@ -353,7 +362,8 @@
         [payload.requestType==='vehicle'?'Vehicle':'Part',payload.requestType==='vehicle'?payload.productName:payload.partName],
         ['Name',payload.fullName],
         ['Phone',payload.phone],
-        ['Contact by',payload.contactMethod]
+        ['Contact by',payload.contactMethod],
+        ['Payment preference',payload.paymentMethod]
       ];
       if(payload.requestType==='vehicle'){
         rows.push(['Purpose',payload.requestPurpose]);
