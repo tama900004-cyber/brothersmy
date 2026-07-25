@@ -54,6 +54,10 @@ async function configureRequestButton() {
         return;
     }
 
+    if (!requestButton.hidden) {
+        await requestButton.hide();
+    }
+
     const product = await productPage.getProduct();
     if (!product) {
         return;
