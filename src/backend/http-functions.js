@@ -15,6 +15,11 @@ const ALLOWED_ORIGIN_PARTS = [
     'parastorage.com',
     'filesusr.com'
 ];
+const PROMOTION = Object.freeze({
+    code: 'WELCOME25',
+    discountRate: 25,
+    currency: 'MYR'
+});
 
 export function options_submitCustomerRequest() {
     return ok({
@@ -37,10 +42,11 @@ export async function post_submitCustomerRequest(request) {
         }
 
         const reference = makeReference();
-        const item = buildItem(data, reference);
+        const quote = calculateQuote(data);
+        const item = buildItem(data, reference, quote);
         await wixData.insert(COLLECTION, item, { suppressAuth: true });
 
-        return json(ok, { ok: true, reference });
+        return json(ok, { ok: true, reference, quote });
     } catch (error) {
         console.error('submitCustomerRequest failed', error);
         return json(serverError, {
@@ -87,6 +93,14 @@ function validateRequest(data) {
         if (!cleanText(data?.deliveryAddress, 300)) {
             return 'Delivery address is required.';
         }
+
+        const promoCode = cleanText(data?.promoCode, 40).toUpperCase();
+        if (promoCode && promoCode !== PROMOTION.code) {
+            return 'Enter a valid promotion code.';
+        }
+        if (promoCode && data?.couponEligible !== true) {
+            return 'This promotion applies only to selected accessories.';
+        }
     }
 
     const rentalStart = parseDate(data?.rentalStart);
@@ -103,7 +117,7 @@ function validateRequest(data) {
     return '';
 }
 
-function buildItem(data, reference) {
+function buildItem(data, reference, quote) {
     const requestType = cleanText(data.requestType, 30);
     const productName = cleanText(data.productName, 100);
     const partName = cleanText(data.partName, 100);
@@ -134,7 +148,7 @@ function buildItem(data, reference) {
         rentalStart: parseDate(data.rentalStart),
         rentalEnd: parseDate(data.rentalEnd),
         paymentMethod: cleanText(data.paymentMethod, 30) || 'Cash at Store',
-        notes: cleanText(data.notes, 1000),
+        notes: buildNotes(data, quote),
         source: cleanText(data.source, 80) || 'Website request form'
     };
 
@@ -145,6 +159,63 @@ function buildItem(data, reference) {
     });
 
     return item;
+}
+
+function calculateQuote(data) {
+    if (cleanText(data?.requestType, 30) !== 'spareParts') {
+        return {
+            estimated: true,
+            currency: PROMOTION.currency,
+            quantity: 1,
+            unitPrice: 0,
+            subtotal: 0,
+            promoCode: '',
+            discountRate: 0,
+            discount: 0,
+            total: 0
+        };
+    }
+
+    const quantity = clampNumber(data?.quantity, 1, 50);
+    const unitPrice = clampMoney(data?.unitPrice, 0, 100000);
+    const promoCode = cleanText(data?.promoCode, 40).toUpperCase();
+    const couponApplied = promoCode === PROMOTION.code &&
+        data?.couponEligible === true &&
+        unitPrice > 0;
+    const subtotal = roundMoney(unitPrice * quantity);
+    const discountRate = couponApplied ? PROMOTION.discountRate : 0;
+    const discount = roundMoney(subtotal * discountRate / 100);
+
+    return {
+        estimated: true,
+        currency: PROMOTION.currency,
+        quantity,
+        unitPrice,
+        subtotal,
+        promoCode: couponApplied ? PROMOTION.code : '',
+        discountRate,
+        discount,
+        total: roundMoney(subtotal - discount)
+    };
+}
+
+function buildNotes(data, quote) {
+    const notes = cleanText(data?.notes, 800);
+    if (!quote?.subtotal) {
+        return notes;
+    }
+
+    const pricingLine = [
+        'Estimated online summary:',
+        `${quote.currency} ${quote.subtotal.toFixed(2)} subtotal`,
+        quote.promoCode
+            ? `${quote.promoCode} (-${quote.discountRate}% / ${quote.currency} ${quote.discount.toFixed(2)})`
+            : 'no promotion applied',
+        `${quote.currency} ${quote.total.toFixed(2)} estimated total`,
+        'final price subject to staff confirmation'
+    ].join(' | ');
+
+    return [notes, pricingLine].filter(Boolean).join('\n').slice(0, 1000);
 }
 
 function getRequestOrigin(request) {
@@ -176,6 +247,18 @@ function clampNumber(value, minimum, maximum) {
         return minimum;
     }
     return Math.min(maximum, Math.max(minimum, Math.round(number)));
+}
+
+function clampMoney(value, minimum, maximum) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) {
+        return minimum;
+    }
+    return roundMoney(Math.min(maximum, Math.max(minimum, number)));
+}
+
+function roundMoney(value) {
+    return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
 }
 
 function makeReference() {
