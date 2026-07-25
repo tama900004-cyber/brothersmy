@@ -17,6 +17,11 @@ const ACTION_ALIASES = Object.freeze({
 });
 
 $w.onReady(async function () {
+    if (isNativeCheckoutPage()) {
+        wixLocationFrontend.to('/payment-options');
+        return;
+    }
+
     fixNativeCarsMenu();
     const initialCheckoutRoute = await routeCheckoutToPaymentOptions();
 
@@ -76,6 +81,14 @@ async function routeCheckoutToPaymentOptions() {
         console.warn('[BROTHERS checkout] Could not update the checkout route:', error);
         return null;
     }
+}
+
+function isNativeCheckoutPage() {
+    const path = Array.isArray(wixLocationFrontend.path)
+        ? wixLocationFrontend.path
+        : [];
+
+    return path.some((segment) => String(segment).toLowerCase() === 'checkout');
 }
 
 function fixNativeCarsMenu() {
