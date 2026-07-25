@@ -37,6 +37,22 @@
     input[readonly]{border-color:#2a2a2d;background:#080809;color:#d5d5d8}
     .hidden{display:none!important}
     .hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important}
+    .quote{padding:16px;border:1px solid #343438;border-radius:12px;background:#09090a}
+    .quote-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:13px}
+    .quote-head b{font-size:14px}
+    .quote-head span{color:var(--muted);font-size:11px;line-height:1.45;text-align:right}
+    .promo-control{display:grid;grid-template-columns:1fr auto;gap:8px}
+    .promo-button{min-width:125px;border:1px solid var(--red);border-radius:10px;background:transparent;color:#ff666c;font-size:12px;font-weight:900}
+    .promo-button:hover{background:rgba(227,27,35,.12)}
+    .promo-message{min-height:17px;margin:7px 0 12px;color:#a7a7ac;font-size:11px;line-height:1.45}
+    .promo-message.good{color:var(--ok)}
+    .promo-message.bad{color:var(--bad)}
+    .money-summary{margin:0;border-top:1px solid #252528}
+    .money-row{display:flex;justify-content:space-between;gap:15px;padding:9px 0;border-bottom:1px solid #202023;font-size:12px}
+    .money-row dt{color:#a0a0a5}
+    .money-row dd{margin:0;font-weight:800}
+    .money-row.total{padding-top:12px;border-bottom:0;color:white;font-size:14px}
+    .quote-note{margin:10px 0 0;color:#818187;font-size:10px;line-height:1.45}
     .payment{display:flex;align-items:center;gap:12px;margin-top:19px;padding:14px;border:1px solid var(--line);border-radius:11px;background:#0b0b0c}
     .coin{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:50%;background:var(--red);font-size:12px;font-weight:900}
     .payment b{display:block;font-size:13px}
@@ -63,7 +79,7 @@
     .action{min-height:46px;border-radius:10px;font-size:13px;font-weight:800}
     .action.primary{border:0;background:var(--red);color:white}
     .action.secondary{border:1px solid #414146;background:transparent;color:white}
-    @media(max-width:620px){body{padding:6px}.shell{border-radius:14px}.grid{grid-template-columns:1fr}.full{grid-column:auto}.hero,.body,.success{padding-left:16px;padding-right:16px}.summary-row{grid-template-columns:1fr;gap:5px}.actions{grid-template-columns:1fr}}
+    @media(max-width:620px){body{padding:6px}.shell{border-radius:14px}.grid{grid-template-columns:1fr}.full{grid-column:auto}.hero,.body,.success{padding-left:16px;padding-right:16px}.summary-row{grid-template-columns:1fr;gap:5px}.actions{grid-template-columns:1fr}.promo-control{grid-template-columns:1fr}.promo-button{min-height:44px}.quote-head{display:block}.quote-head span{display:block;margin-top:5px;text-align:left}}
   </style>
 </head>
 <body>
@@ -88,6 +104,9 @@
         <form id="requestForm" novalidate>
           <input id="requestType" type="hidden" value="vehicle">
           <input id="productId" type="hidden">
+          <input id="unitPrice" type="hidden" value="0">
+          <input id="currency" type="hidden" value="MYR">
+          <input id="couponEligible" type="hidden" value="false">
           <input id="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
           <div class="grid">
@@ -161,6 +180,25 @@
               <label for="deliveryAddress">Delivery / contact address *</label>
               <textarea id="deliveryAddress" maxlength="300" autocomplete="street-address" placeholder="House or unit, street, area, postcode and state"></textarea>
             </div>
+            <div class="field full part-field hidden quote" id="quoteBox">
+              <div class="quote-head">
+                <b>Estimated price summary</b>
+                <span id="quoteAvailability">Select a catalog product to see its current display price.</span>
+              </div>
+              <label for="promoCode">Promotion code <span class="hint">selected accessories only</span></label>
+              <div class="promo-control">
+                <input id="promoCode" maxlength="40" autocomplete="off" placeholder="Enter WELCOME25">
+                <button id="applyPromo" class="promo-button" type="button">APPLY CODE</button>
+              </div>
+              <p id="promoMessage" class="promo-message" role="status" aria-live="polite">WELCOME25 gives 25% off selected accessories.</p>
+              <dl class="money-summary">
+                <div class="money-row"><dt>Unit price</dt><dd id="unitPriceText">To be confirmed</dd></div>
+                <div class="money-row"><dt>Subtotal</dt><dd id="subtotalText">To be confirmed</dd></div>
+                <div class="money-row"><dt>Discount</dt><dd id="discountText">—</dd></div>
+                <div class="money-row total"><dt>Estimated total</dt><dd id="totalText">To be confirmed</dd></div>
+              </dl>
+              <p class="quote-note">This is an estimate for the request summary. Availability, compatibility and the final price are confirmed by BROTHER'S before payment.</p>
+            </div>
             <div class="field full">
               <label for="notes">Extra details <span class="hint">optional</span></label>
               <textarea id="notes" maxlength="1000" placeholder="Colour, specification, part number, preferred collection time, or anything that helps us prepare."></textarea>
@@ -208,7 +246,8 @@
     const form=byId('requestForm');
     const statusBox=byId('status');
     const submitButton=byId('submitButton');
-    let initialContext={requestType:'vehicle',productName:'',productId:'',fullName:'',email:'',phone:''};
+    let initialContext={requestType:'vehicle',productName:'',productId:'',unitPrice:0,currency:'MYR',couponEligible:false,fullName:'',email:'',phone:''};
+    let appliedPromo='';
 
     function setRequestType(type){
       const safeType=type==='spareParts'?'spareParts':'vehicle';
@@ -234,8 +273,13 @@
         ?'Share the basic details. Our team will confirm vehicle availability and contact you before any payment.'
         :'Tell us the part and your vehicle details. We will confirm compatibility, availability and final price.';
       submitButton.textContent=safeType==='vehicle'?'SUBMIT VEHICLE REQUEST':'SUBMIT SPARE PART REQUEST';
+      if(safeType==='vehicle'){
+        appliedPromo='';
+        byId('promoCode').value='';
+      }
       updateVehicleDateFields();
       updateSelection();
+      updateQuote();
       clearStatus();
     }
 
@@ -252,6 +296,9 @@
       setValue('email',initialContext.email);
       setValue('phone',initialContext.phone);
       setValue('productId',initialContext.productId);
+      byId('unitPrice').value=String(normalizeMoney(initialContext.unitPrice));
+      byId('currency').value=String(initialContext.currency||'MYR').toUpperCase().slice(0,3);
+      byId('couponEligible').value=String(initialContext.couponEligible===true);
       if(initialContext.requestType==='spareParts'){
         setValue('partName',initialContext.productName);
         byId('partName').readOnly=Boolean(initialContext.productName);
@@ -271,6 +318,78 @@
       const name=type==='vehicle'?byId('productName').value.trim():byId('partName').value.trim();
       byId('selectionName').textContent=name;
       byId('selection').classList.toggle('show',Boolean(name));
+      updateQuote();
+    }
+
+    function normalizeMoney(value){
+      const number=Number(value);
+      return Number.isFinite(number)&&number>0?Math.min(number,100000):0;
+    }
+
+    function money(value){
+      const currency=byId('currency').value||'MYR';
+      return new Intl.NumberFormat('en-MY',{style:'currency',currency}).format(Number(value)||0);
+    }
+
+    function currentQuote(){
+      const unitPrice=normalizeMoney(byId('unitPrice').value);
+      const quantity=Math.min(50,Math.max(1,Math.round(Number(byId('quantity').value)||1)));
+      const subtotal=Math.round((unitPrice*quantity+Number.EPSILON)*100)/100;
+      const eligible=byId('couponEligible').value==='true';
+      const applied=appliedPromo==='WELCOME25'&&eligible&&subtotal>0;
+      const discountRate=applied?25:0;
+      const discount=Math.round((subtotal*discountRate/100+Number.EPSILON)*100)/100;
+      return {unitPrice,quantity,subtotal,promoCode:applied?'WELCOME25':'',discountRate,discount,total:Math.round((subtotal-discount+Number.EPSILON)*100)/100};
+    }
+
+    function updateQuote(){
+      const quote=currentQuote();
+      const hasPrice=quote.unitPrice>0;
+      byId('unitPriceText').textContent=hasPrice?money(quote.unitPrice):'To be confirmed';
+      byId('subtotalText').textContent=hasPrice?money(quote.subtotal):'To be confirmed';
+      byId('discountText').textContent=quote.discount>0?`- ${money(quote.discount)} (${quote.discountRate}%)`:'—';
+      byId('totalText').textContent=hasPrice?money(quote.total):'To be confirmed';
+      byId('quoteAvailability').textContent=hasPrice
+        ?`Current catalog price × ${quote.quantity}`
+        :'Select a catalog product to see its current display price.';
+    }
+
+    function setPromoMessage(message,state=''){
+      const box=byId('promoMessage');
+      box.textContent=message;
+      box.className=`promo-message ${state}`.trim();
+    }
+
+    function applyPromoCode(){
+      const code=byId('promoCode').value.trim().toUpperCase();
+      byId('promoCode').value=code;
+      if(!code){
+        appliedPromo='';
+        setPromoMessage('Promotion removed. WELCOME25 gives 25% off selected accessories.');
+        updateQuote();
+        return;
+      }
+      if(code!=='WELCOME25'){
+        appliedPromo='';
+        setPromoMessage('This promotion code is not valid.','bad');
+        updateQuote();
+        return;
+      }
+      if(byId('couponEligible').value!=='true'){
+        appliedPromo='';
+        setPromoMessage('WELCOME25 applies only to products in the selected Accessories collection.','bad');
+        updateQuote();
+        return;
+      }
+      if(normalizeMoney(byId('unitPrice').value)<=0){
+        appliedPromo='';
+        setPromoMessage('Open an eligible accessory from the catalog before applying the code.','bad');
+        updateQuote();
+        return;
+      }
+      appliedPromo='WELCOME25';
+      setPromoMessage('WELCOME25 applied: 25% off this selected accessory.','good');
+      updateQuote();
     }
 
     function clearStatus(){
@@ -327,6 +446,10 @@
         installationRequired:type==='spareParts'&&byId('installationRequired').value==='true',
         deliveryAddress:type==='spareParts'?byId('deliveryAddress').value.trim():'',
         paymentMethod:byId('paymentMethod').value,
+        unitPrice:type==='spareParts'?currentQuote().unitPrice:0,
+        currency:byId('currency').value||'MYR',
+        couponEligible:type==='spareParts'&&byId('couponEligible').value==='true',
+        promoCode:type==='spareParts'?currentQuote().promoCode:'',
         notes:byId('notes').value.trim(),
         company:byId('company').value,
         source:'Wix request form'
@@ -347,7 +470,7 @@
         const response=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
         const result=await response.json().catch(()=>({}));
         if(!response.ok||!result.ok)throw new Error(result.message||'The request could not be saved.');
-        showSummary(payload,result.reference);
+        showSummary(payload,result.reference,result.quote||currentQuote());
       }catch(error){
         showError(error.message||'The request could not be saved. Please try again.');
       }finally{
@@ -356,7 +479,7 @@
       }
     }
 
-    function showSummary(payload,reference){
+    function showSummary(payload,reference,quote){
       const rows=[
         ['Request',payload.requestType==='vehicle'?'Vehicle':'Spare Parts'],
         [payload.requestType==='vehicle'?'Vehicle':'Part',payload.requestType==='vehicle'?payload.productName:payload.partName],
@@ -372,6 +495,14 @@
       }else{
         rows.push(['For vehicle',`${payload.vehicleMakeModel}${payload.vehicleYear?' ('+payload.vehicleYear+')':''}`]);
         rows.push(['Quantity',String(payload.quantity)]);
+        if(quote&&quote.subtotal>0){
+          rows.push(['Unit price',money(quote.unitPrice)]);
+          rows.push(['Subtotal',money(quote.subtotal)]);
+          if(quote.promoCode)rows.push(['Promotion',`${quote.promoCode} — ${quote.discountRate}% off`]);
+          if(quote.discount>0)rows.push(['Discount',`- ${money(quote.discount)}`]);
+          rows.push(['Estimated total',money(quote.total)]);
+          rows.push(['Price status','Estimate — final price confirmed by staff']);
+        }
         rows.push(['Address',payload.deliveryAddress]);
       }
       byId('reference').textContent=`REFERENCE: ${reference}`;
@@ -396,6 +527,8 @@
       form.reset();
       byId('partName').readOnly=false;
       byId('productName').readOnly=false;
+      appliedPromo='';
+      byId('promoCode').value='';
       byId('successView').classList.remove('show');
       byId('requestView').classList.remove('hidden');
       applyContext(initialContext);
@@ -406,6 +539,15 @@
     byId('requestPurpose').addEventListener('change',updateVehicleDateFields);
     byId('productName').addEventListener('input',updateSelection);
     byId('partName').addEventListener('input',updateSelection);
+    byId('quantity').addEventListener('input',updateQuote);
+    byId('promoCode').addEventListener('input',()=>{
+      if(appliedPromo&&byId('promoCode').value.trim().toUpperCase()!==appliedPromo){
+        appliedPromo='';
+        setPromoMessage('Code changed. Apply it again to update the estimate.');
+        updateQuote();
+      }
+    });
+    byId('applyPromo').addEventListener('click',applyPromoCode);
     byId('newRequest').addEventListener('click',startAnotherRequest);
     byId('printSummary').addEventListener('click',()=>window.print());
     form.addEventListener('submit',submitRequest);
