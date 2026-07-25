@@ -52,6 +52,9 @@ async function buildRequestContext() {
         requestType: normalizeRequestType(query.type),
         productName: cleanQueryValue(query.product, 100),
         productId: cleanQueryValue(query.productId, 80),
+        unitPrice: cleanPrice(query.unitPrice),
+        currency: cleanCurrency(query.currency),
+        couponEligible: cleanQueryValue(query.couponEligible, 10) === 'true',
         fullName,
         email: firstValue(contactDetails.emails) || member?.loginEmail || '',
         phone: firstValue(contactDetails.phones)
@@ -87,6 +90,19 @@ function normalizeRequestType(value) {
 function cleanQueryValue(value, maxLength) {
     const first = Array.isArray(value) ? value[0] : value;
     return String(first || '').trim().slice(0, maxLength);
+}
+
+function cleanPrice(value) {
+    const number = Number(cleanQueryValue(value, 20));
+    if (!Number.isFinite(number) || number <= 0) {
+        return 0;
+    }
+    return Math.min(number, 100000);
+}
+
+function cleanCurrency(value) {
+    const currency = cleanQueryValue(value, 3).toUpperCase();
+    return /^[A-Z]{3}$/.test(currency) ? currency : 'MYR';
 }
 
 function firstValue(value) {
