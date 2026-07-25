@@ -6,7 +6,12 @@ const elevatedCreateOrder = elevate(orders.createOrder);
 const PAYMENT_OPTIONS_URL = 'https://tama900004.wixsite.com/brothersmy/payment-options';
 
 function imageUrl(media) {
-  const value = media?.mainMedia?.image?.url || media?.image?.url || media?.url || '';
+  const value = typeof media === 'string'
+    ? media
+    : media?.mainMedia?.image?.url || media?.image?.url || media?.url || media?.id || '';
+  if (/^[\w-]+_[\w-]+~mv2\.[a-z0-9]+$/i.test(value)) {
+    return `https://static.wixstatic.com/media/${value}`;
+  }
   if (!value.startsWith('wix:image://v1/')) return value;
   const mediaId = value.slice('wix:image://v1/'.length).split('/')[0];
   return mediaId ? `https://static.wixstatic.com/media/${mediaId}` : '';
