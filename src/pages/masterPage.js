@@ -18,8 +18,21 @@ const ACTION_ALIASES = Object.freeze({
 
 $w.onReady(async function () {
     fixNativeCarsMenu();
-    await routeCheckoutToPaymentOptions();
-    wixEcomFrontend.onCartChange(routeCheckoutToPaymentOptions);
+    const initialCheckoutRoute = await routeCheckoutToPaymentOptions();
+
+    // Refresh once before registering the cart-change listener. This updates
+    // stale native Checkout links without creating a refresh event loop.
+    if (initialCheckoutRoute && initialCheckoutRoute.reason !== 'EMPTY_CART') {
+        await wixEcomFrontend.refreshCart();
+    }
+
+    wixEcomFrontend.onCartChange(async () => {
+        const changedCheckoutRoute = await routeCheckoutToPaymentOptions();
+
+        if (changedCheckoutRoute?.updated) {
+            await wixEcomFrontend.refreshCart();
+        }
+    });
 
     const htmlHeader = findHeaderComponent();
 
@@ -58,16 +71,7 @@ $w.onReady(async function () {
 
 async function routeCheckoutToPaymentOptions() {
     try {
-        const result = await ensureCheckoutRoute();
-
-        // Wix keeps the native Side Cart and Cart Page state cached after a
-        // programmatic cart update. Refreshing here makes their Checkout links
-        // pick up overrideCheckoutUrl immediately.
-        if (result?.updated) {
-            await wixEcomFrontend.refreshCart();
-        }
-
-        return result;
+        return await ensureCheckoutRoute();
     } catch (error) {
         console.warn('[BROTHERS checkout] Could not update the checkout route:', error);
         return null;
