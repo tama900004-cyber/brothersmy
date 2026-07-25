@@ -104,19 +104,43 @@ export const loadPaymentContext = webMethod(Permissions.Anyone, async () => {
 });
 
 export const ensureCheckoutRoute = webMethod(Permissions.Anyone, async () => {
-  const cart = await currentCart.getCurrentCart();
+  let cart = await currentCart.getCurrentCart();
   if (!cart?.lineItems?.length) {
     return { updated: false, reason: 'EMPTY_CART' };
   }
 
+  let updated = false;
+
   if (cart.overrideCheckoutUrl !== PAYMENT_OPTIONS_URL) {
-    await currentCart.updateCurrentCart({
+    cart = await currentCart.updateCurrentCart({
       overrideCheckoutUrl: PAYMENT_OPTIONS_URL
     });
-    return { updated: true };
+    updated = true;
   }
 
-  return { updated: false, reason: 'ALREADY_SET' };
+  // Synchronize any checkout that Wix may have created before the cart route
+  // was updated. Re-creating from the same cart updates the existing checkout.
+  const created = await currentCart.createCheckoutFromCurrentCart({
+    channelType: 'WEB'
+  });
+  const checkoutId = created.checkoutId || created._id || created.id;
+
+  if (!checkoutId) {
+    throw new Error('The checkout route could not be prepared.');
+  }
+
+  const urlResult = await checkout.getCheckoutUrl(checkoutId, {});
+  const checkoutUrl = urlResult.checkoutUrl || urlResult.url || '';
+
+  if (checkoutUrl !== PAYMENT_OPTIONS_URL) {
+    throw new Error('Wix did not apply the custom checkout route.');
+  }
+
+  return {
+    updated,
+    reason: updated ? 'UPDATED' : 'ALREADY_SET',
+    checkoutUrl
+  };
 });
 
 export const placeCounterOrder = webMethod(Permissions.Anyone, async (customerInput) => {
