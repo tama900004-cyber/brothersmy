@@ -42,7 +42,7 @@ export const PROMOTION = Object.freeze({
 
 export const REQUEST_FORM = Object.freeze({
     route: '/new-inventory',
-    componentIds: Object.freeze(['#htmlRequestForm', '#html1', '#html3']),
+    componentIds: Object.freeze(['#html13', '#htmlRequestForm', '#html1', '#html3']),
     inboundSource: 'brothersRequestForm',
     outboundSource: 'brothersWix'
 });
