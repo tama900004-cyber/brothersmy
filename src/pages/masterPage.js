@@ -207,7 +207,7 @@ function wireVehicleBooking() {
             }
 
             const vehicleQuery = booking.vehicle
-                ? `&vehicle=${encodeURIComponent(booking.vehicle)}`
+                ? `&product=${encodeURIComponent(booking.vehicle)}`
                 : '';
 
             navigateTo(`${REQUEST_FORM.route}?type=vehicle${vehicleQuery}`);
