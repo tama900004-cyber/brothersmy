@@ -1,7 +1,40 @@
 import wixLocationFrontend from 'wix-location-frontend';
 import wixEcomFrontend from 'wix-ecom-frontend';
-import { HEADER_BRIDGE, ROUTES } from 'public/siteConfig';
+import { HEADER_BRIDGE, REQUEST_FORM, ROUTES } from 'public/siteConfig';
 import { ensureCheckoutRoute } from 'backend/counterOrders.web';
+
+const VEHICLE_COMPONENT_IDS = Object.freeze([
+    '#htmlCars',
+    '#carsCatalog',
+    '#vehicleCatalog',
+    '#html1',
+    '#html2',
+    '#html3',
+    '#html4',
+    '#html5',
+    '#html6',
+    '#html7',
+    '#html8',
+    '#html9',
+    '#html10',
+    '#html11',
+    '#html12'
+]);
+
+const VEHICLE_ACTIONS = new Set([
+    'book',
+    'booknow',
+    'bookcar',
+    'bookvehicle',
+    'reserve',
+    'reservenow',
+    'selectcar',
+    'selectvehicle',
+    'vehiclebooking',
+    'vehiclerequest',
+    'openform',
+    'requestvehicle'
+]);
 
 const ACTION_ALIASES = Object.freeze({
     home: 'home',
@@ -23,6 +56,7 @@ $w.onReady(async function () {
     }
 
     fixNativeCarsMenu();
+    wireVehicleBooking();
     const initialCheckoutRoute = await routeCheckoutToPaymentOptions();
 
     // Refresh once before registering the cart-change listener. This updates
@@ -93,7 +127,7 @@ function isNativeCheckoutPage() {
 
 function fixNativeCarsMenu() {
     const menuSelector = '#comp-mrhg15xp';
-    const carsRoute = '/category/cars';
+    const carsRoute = ROUTES.cars;
 
     try {
         const menu = $w(menuSelector);
@@ -124,6 +158,124 @@ function fixNativeCarsMenu() {
     } catch (error) {
         console.warn('[BROTHERS menu] Could not update Cars link:', error);
     }
+}
+
+function wireVehicleBooking() {
+    if (!isCarsPage()) {
+        return;
+    }
+
+    const components = [];
+
+    for (const selector of VEHICLE_COMPONENT_IDS) {
+        try {
+            const component = $w(selector);
+
+            if (
+                component &&
+                typeof component.onMessage === 'function' &&
+                !components.some((item) => item.id === component.id)
+            ) {
+                components.push(component);
+            }
+        } catch {
+            // This selector is not present on the Cars page.
+        }
+    }
+
+    for (const component of components) {
+        component.onMessage((event) => {
+            if (isWixInternalMessage(event.data)) {
+                return;
+            }
+
+            const booking = normalizeVehicleBooking(event.data);
+
+            if (!booking) {
+                return;
+            }
+
+            const vehicleQuery = booking.vehicle
+                ? `&vehicle=${encodeURIComponent(booking.vehicle)}`
+                : '';
+
+            navigateTo(`${REQUEST_FORM.route}?type=vehicle${vehicleQuery}`);
+        });
+
+        try {
+            component.postMessage({
+                source: 'brothersWix',
+                type: 'vehicleBookingReady',
+                formRoute: REQUEST_FORM.route
+            });
+        } catch (error) {
+            console.warn('[BROTHERS vehicles] Could not initialize booking bridge:', error);
+        }
+    }
+}
+
+function isCarsPage() {
+    const path = Array.isArray(wixLocationFrontend.path)
+        ? wixLocationFrontend.path.map((segment) => String(segment).toLowerCase())
+        : [];
+
+    return path.includes('cars');
+}
+
+function normalizeVehicleBooking(data) {
+    if (!data) {
+        return null;
+    }
+
+    if (typeof data === 'string') {
+        try {
+            return normalizeVehicleBooking(JSON.parse(data));
+        } catch {
+            return null;
+        }
+    }
+
+    if (typeof data !== 'object') {
+        return null;
+    }
+
+    const rawAction =
+        data.action ||
+        data.command ||
+        data.type ||
+        data.event ||
+        data.eventName ||
+        data.payload?.action ||
+        data.payload?.type;
+    const action = String(rawAction || '')
+        .toLowerCase()
+        .replace(/[^a-z]/g, '');
+
+    if (!VEHICLE_ACTIONS.has(action)) {
+        return null;
+    }
+
+    const rawVehicle =
+        data.vehicleName ||
+        data.vehicle ||
+        data.carName ||
+        data.car ||
+        data.model ||
+        data.title ||
+        data.payload?.vehicleName ||
+        data.payload?.vehicle ||
+        data.payload?.carName ||
+        data.payload?.car ||
+        data.payload?.model ||
+        data.payload?.title ||
+        '';
+    const vehicle = typeof rawVehicle === 'object'
+        ? rawVehicle.name || rawVehicle.title || rawVehicle.model || ''
+        : rawVehicle;
+
+    return {
+        vehicle: String(vehicle || '').trim().slice(0, 120)
+    };
 }
 
 function findHeaderComponent() {
@@ -237,3 +389,4 @@ function sendStatus(htmlHeader, payload) {
         console.warn('[BROTHERS header] Could not send status to HTML component:', error);
     }
 }
+
