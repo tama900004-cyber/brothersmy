@@ -26,13 +26,21 @@ const VEHICLE_ACTIONS = new Set([
     'booknow',
     'bookcar',
     'bookvehicle',
+    'booking',
     'reserve',
     'reservenow',
+    'rent',
+    'rentnow',
+    'rentalrequest',
     'selectcar',
     'selectvehicle',
     'vehiclebooking',
     'vehiclerequest',
+    'openbookingform',
     'openform',
+    'request',
+    'requestbooking',
+    'requestcar',
     'requestvehicle'
 ]);
 
@@ -231,7 +239,11 @@ function normalizeVehicleBooking(data) {
         try {
             return normalizeVehicleBooking(JSON.parse(data));
         } catch {
-            return null;
+            const vehicle = data.trim();
+
+            return vehicle.length >= 2 && vehicle.length <= 120
+                ? { vehicle }
+                : null;
         }
     }
 
@@ -251,10 +263,6 @@ function normalizeVehicleBooking(data) {
         .toLowerCase()
         .replace(/[^a-z]/g, '');
 
-    if (!VEHICLE_ACTIONS.has(action)) {
-        return null;
-    }
-
     const rawVehicle =
         data.vehicleName ||
         data.vehicle ||
@@ -272,6 +280,10 @@ function normalizeVehicleBooking(data) {
     const vehicle = typeof rawVehicle === 'object'
         ? rawVehicle.name || rawVehicle.title || rawVehicle.model || ''
         : rawVehicle;
+
+    if (!VEHICLE_ACTIONS.has(action) && !vehicle) {
+        return null;
+    }
 
     return {
         vehicle: String(vehicle || '').trim().slice(0, 120)
