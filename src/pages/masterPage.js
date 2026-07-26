@@ -67,6 +67,7 @@ $w.onReady(async function () {
 
     fixNativeCarsMenu();
     wireVehicleBooking();
+    wireRequestForm();
     const initialCheckoutRoute = await routeCheckoutToPaymentOptions();
 
     // Refresh once before registering the cart-change listener. This updates
@@ -230,6 +231,59 @@ function isCarsPage() {
         : [];
 
     return path.includes('cars');
+}
+
+function wireRequestForm() {
+    if (!isRequestFormPage()) {
+        return;
+    }
+
+    try {
+        const component = $w('#html13');
+
+        if (
+            !component ||
+            typeof component.onMessage !== 'function' ||
+            typeof component.postMessage !== 'function'
+        ) {
+            return;
+        }
+
+        const query = wixLocationFrontend.query || {};
+        const payload = {
+            requestType: 'vehicle',
+            productName: String(query.vehicle || query.productName || '').trim().slice(0, 120),
+            productId: String(query.vehicleId || query.productId || '').trim().slice(0, 120)
+        };
+        const sendContext = () => {
+            component.postMessage({
+                source: 'brothersWix',
+                type: 'requestFormInit',
+                payload
+            });
+        };
+
+        component.onMessage((event) => {
+            const message = event.data || {};
+
+            if (
+                message.source === 'brothersRequestForm' &&
+                message.type === 'ready'
+            ) {
+                sendContext();
+            }
+        });
+    } catch (error) {
+        console.warn('[BROTHERS request form] Could not initialize vehicle context:', error);
+    }
+}
+
+function isRequestFormPage() {
+    const path = Array.isArray(wixLocationFrontend.path)
+        ? wixLocationFrontend.path.map((segment) => String(segment).toLowerCase())
+        : [];
+
+    return path.includes('new-inventory') || path.includes('form-request');
 }
 
 function normalizeVehicleBooking(data) {
