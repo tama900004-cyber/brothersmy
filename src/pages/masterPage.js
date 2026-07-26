@@ -4,6 +4,7 @@ import { HEADER_BRIDGE, REQUEST_FORM, ROUTES } from 'public/siteConfig';
 import { ensureCheckoutRoute } from 'backend/counterOrders.web';
 
 const VEHICLE_COMPONENT_IDS = Object.freeze([
+    '#comp-ms0ecq24',
     '#htmlCars',
     '#carsCatalog',
     '#vehicleCatalog',
@@ -401,4 +402,3 @@ function sendStatus(htmlHeader, payload) {
         console.warn('[BROTHERS header] Could not send status to HTML component:', error);
     }
 }
-
