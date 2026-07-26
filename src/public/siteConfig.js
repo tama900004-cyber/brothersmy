@@ -17,7 +17,7 @@ export const ROUTES = Object.freeze({
     home: '/',
     shop: '/category/parts',
     products: '/category/parts',
-    cars: '/category/cars',
+    cars: '/cars',
     accessories: '/category/accessories',
     services: '/book-online',
     rental: '/new-inventory',
@@ -46,3 +46,4 @@ export const REQUEST_FORM = Object.freeze({
     inboundSource: 'brothersRequestForm',
     outboundSource: 'brothersWix'
 });
+
