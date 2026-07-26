@@ -5,6 +5,7 @@ import { ensureCheckoutRoute } from 'backend/counterOrders.web';
 
 const VEHICLE_COMPONENT_IDS = Object.freeze([
     '#comp-ms0ecq24',
+    '#html17',
     '#htmlCars',
     '#carsCatalog',
     '#vehicleCatalog',
